@@ -1,0 +1,33 @@
+[build-system]
+requires = [
+    "setuptools>=60",
+    "setuptools-scm>=8.0"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "centromere_status_checker"
+authors = [
+    {name = "Keith Oshima", email = "oshimak@pennmedicine.upenn.edu"},
+]
+description = "Centromere status checker."
+readme = "README.md"
+requires-python = ">=3.12"
+license = {text = "MIT License"}
+dependencies = [
+    "polars",
+    "editdistance"
+]
+dynamic = ["version"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["centromere_status_checker*"]
+exclude = ["docs*", "test*"]
+
+[tool.setuptools_scm]
+
+[project.scripts]
+cens-status = "centromere_status_checker.cli:main"

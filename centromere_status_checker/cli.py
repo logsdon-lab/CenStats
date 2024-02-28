@@ -1,0 +1,226 @@
+import re
+import sys
+import argparse
+import polars as pl
+import editdistance
+from typing import TextIO
+
+from .orientation import Orientation
+from .repeat_jaccard_index import jaccard_index, get_contig_similarity_by_jaccard_index
+from .repeat_edit_dst import get_contig_similarity_by_edit_dst
+from .acrocentrics import get_p_arm_acro_chr, flatten_repeats
+from .constants import (
+    ACROCENTRIC_CHROMOSOMES,
+    RGX_CHR,
+    EDGE_LEN,
+    EDGE_PERC_ALR_THR,
+    DST_PERC_THR,
+)
+from .reader import read_repeatmasker_output
+from .partial_cen import is_partial_centromere
+
+
+def join_summarize_results(
+    df_partial_contig_res: pl.DataFrame,
+    df_jaccard_index_res: pl.DataFrame,
+    df_edit_distance_res: pl.DataFrame,
+    df_edit_distance_same_chr_res: pl.DataFrame,
+) -> pl.DataFrame:
+    return (
+        # Join result dfs.
+        # use partial contig res so always get all contigs.
+        df_partial_contig_res.join(
+            df_jaccard_index_res.join(df_edit_distance_res, on="contig")
+            .group_by("contig")
+            .first(),
+            on="contig",
+            how="left",
+        )
+        # Add default ort per contig.
+        .join(df_edit_distance_same_chr_res, on="contig", how="left")
+        .select(
+            contig=pl.col("contig"),
+            # Extract chromosome name.
+            # Both results must concur.
+            final_contig=pl.when(pl.col("ref") == pl.col("ref_right"))
+            .then(pl.col("ref").str.extract(RGX_CHR.pattern))
+            .otherwise(pl.col("contig").str.extract(RGX_CHR.pattern)),
+            # Only use orientation if both agree. Otherwise, replace with best same chr ort.
+            reorient=pl.when(pl.col("ref") == pl.col("ref_right"))
+            .then(pl.col("ort"))
+            .otherwise(None)
+            .fill_null(pl.col("ort_same_chr")),
+            partial=pl.col("partial"),
+        )
+        # Replace chr name in original contig.
+        .with_columns(
+            final_contig=pl.col("contig").str.replace(
+                RGX_CHR.pattern, pl.col("final_contig")
+            ),
+            # Never reorient if reference or chrY (ref doesn't contain chrY)
+            reorient=pl.when(
+                (pl.col("contig").str.starts_with("chm13"))
+                | (pl.col("contig").str.contains("chrY"))
+            )
+            .then(
+                pl.col("reorient").str.replace(Orientation.Reverse, Orientation.Forward)
+            )
+            .otherwise(pl.col("reorient")),
+        )
+    )
+
+
+def check_cens_status(
+    input_rm: str,
+    output: TextIO,
+    reference_rm: str,
+    *,
+    dst_perc_thr: float = DST_PERC_THR,
+    edge_perc_alr_thr: float = EDGE_PERC_ALR_THR,
+    edge_len: int = EDGE_LEN,
+) -> int:
+    df_ctg = read_repeatmasker_output(input_rm).collect()
+    df_ref = (
+        read_repeatmasker_output(reference_rm)
+        .filter(~pl.col("contig").str.starts_with("chm1"))
+        .collect()
+    )
+
+    contigs, refs, dsts, orts = [], [], [], []
+    jcontigs, jrefs, jindex = [], [], []
+    pcontigs, pstatus = [], []
+
+    for ctg, df_ctg_grp in df_ctg.group_by(["contig"]):
+        ctg = ctg[0]
+        mtch_chr_name = re.search(RGX_CHR, ctg)
+        if not mtch_chr_name:
+            continue
+        chr_name = mtch_chr_name.group()
+
+        # For acros (13, 14, 15, 21, 21)
+        # Adjust edit distance to only use p-arm of chr.
+        if chr_name in ACROCENTRIC_CHROMOSOMES:
+            df_ctg_grp = get_p_arm_acro_chr(flatten_repeats(df_ctg_grp))
+
+        for ref, df_ref_grp in df_ref.group_by(["contig"]):
+            ref = ref[0]
+            mtch_ref_chr_name = re.search(RGX_CHR, ctg)
+            if not mtch_ref_chr_name:
+                continue
+            ref_chr_name = mtch_ref_chr_name.group()
+
+            # Also adjust for reference acrocentrics.
+            if ref_chr_name in ACROCENTRIC_CHROMOSOMES:
+                df_ref_grp = get_p_arm_acro_chr(flatten_repeats(df_ref_grp))
+
+            dst_fwd = editdistance.eval(
+                df_ref_grp["type"].to_list(),
+                df_ctg_grp["type"].to_list(),
+            )
+            dst_rev = editdistance.eval(
+                df_ref_grp["type"].to_list(),
+                df_ctg_grp["type"].reverse().to_list(),
+            )
+
+            repeat_type_jindex = jaccard_index(
+                set(df_ref_grp["type"]), set(df_ctg_grp["type"])
+            )
+            jcontigs.append(ctg)
+            jrefs.append(ref)
+            jindex.append(repeat_type_jindex)
+
+            contigs.append(ctg)
+            contigs.append(ctg)
+            refs.append(ref)
+            refs.append(ref)
+            orts.append(Orientation.Forward)
+            orts.append(Orientation.Reverse)
+            dsts.append(dst_fwd)
+            dsts.append(dst_rev)
+
+        pcontigs.append(ctg)
+        pstatus.append(
+            is_partial_centromere(
+                df_ctg_grp, edge_len=edge_len, edge_perc_alr_thr=edge_perc_alr_thr
+            )
+        )
+
+    df_jaccard_index_res = get_contig_similarity_by_jaccard_index(
+        jcontigs, jrefs, jindex
+    )
+    (
+        df_filter_edit_distance_res,
+        df_filter_ort_same_chr_res,
+    ) = get_contig_similarity_by_edit_dst(
+        contigs, refs, dsts, orts, dst_perc_thr=dst_perc_thr
+    )
+    df_partial_contig_res = pl.DataFrame({"contig": pcontigs, "partial": pstatus})
+
+    res = join_summarize_results(
+        df_partial_contig_res=df_partial_contig_res,
+        df_jaccard_index_res=df_jaccard_index_res,
+        df_edit_distance_res=df_filter_edit_distance_res,
+        df_edit_distance_same_chr_res=df_filter_ort_same_chr_res,
+    )
+
+    res.write_csv(output, include_header=False, separator="\t")
+    return 0
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(
+        description="Determines if centromeres are incorrectly oriented/mapped with respect to a reference."
+    )
+    ap.add_argument(
+        "-i",
+        "--input",
+        help="Input RepeatMasker output. Should contain contig reference. Expects no header.",
+        type=str,
+        required=True,
+    )
+    ap.add_argument(
+        "-o",
+        "--output",
+        help="List of contigs with actions required to fix.",
+        default=sys.stdout,
+        type=argparse.FileType("wt"),
+    )
+    ap.add_argument(
+        "-r",
+        "--reference",
+        required=True,
+        type=str,
+        help="Reference RM dataframe.",
+    )
+    ap.add_argument(
+        "--dst_perc_thr",
+        default=DST_PERC_THR,
+        type=float,
+        help="Edit distance percentile threshold. Lower is more stringent.",
+    )
+    ap.add_argument(
+        "--edge_perc_alr_thr",
+        default=EDGE_PERC_ALR_THR,
+        type=float,
+        help="Percent ALR on edges of contig to be considered a partial centromere.",
+    )
+    ap.add_argument(
+        "--edge_len",
+        default=EDGE_LEN,
+        type=int,
+        help="Edge len to calculate edge_perc_alr_thr.",
+    )
+    args = ap.parse_args()
+
+    return check_cens_status(
+        args.input,
+        args.output,
+        args.reference,
+        dst_perc_thr=args.dst_perc_thr,
+        edge_len=args.edge_len,
+        edge_perc_alr_thr=args.edge_perc_alr_thr,
+    )
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
