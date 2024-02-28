@@ -1,4 +1,6 @@
 # Centromere Status Checker
+[![CI](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml)
+
 Determine the status of centromeric contigs based on RepeatMasker annotations.
 
 ### Setup
