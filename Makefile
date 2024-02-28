@@ -10,7 +10,7 @@ build:
 	$(BIN)python3 -m build
 
 venv:
-	python3 -m virtualenv venv
+	python3 -m venv venv
 
 clean:
 	rm -rf dist/ $(PROJECT_NAME)*/ venv/
