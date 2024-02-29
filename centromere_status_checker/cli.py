@@ -131,8 +131,8 @@ def check_cens_status(
             df_q_arm_ctg_grp = get_q_arm_acro_chr(df_flatten_ctg_grp)
 
         for ref_name, ref_ctg in df_ref_grps.items():
-            # Check difference in number of HOR arrays between two contigs to determine if use acro q-arm.
-            # If greater than or equal to two, assume not the same chr and align to original contig instead of flattened.
+            # Check difference in number of HOR arrays between two contigs to determine if really acrocentric chr.
+            # If diff in num of HOR arrays less than 3, assume same chr and align to q-arm.
             if (
                 chr_name in ACROCENTRIC_CHROMOSOMES
                 and ref_name in ACROCENTRIC_CHROMOSOMES

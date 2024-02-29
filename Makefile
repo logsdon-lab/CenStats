@@ -11,6 +11,7 @@ build:
 	$(BIN)python3 -m build
 
 install:
+	$(BIN)python3 -m pip uninstall -y $(PROJECT_NAME)
 	$(BIN)python3 -m pip install $(shell find dist -name "*.whl" | sort -r | head -1)
 
 venv:

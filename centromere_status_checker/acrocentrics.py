@@ -56,11 +56,11 @@ def flatten_repeats(df: pl.DataFrame, *, window_size=5) -> pl.DataFrame:
     """
     Flattens/denoises sequences of repeats by:
     1. Creating overlapping repeat windows of `window_size`.
-    2. Finding the largest repeat in that window and setting the current row type to that type.
+    2. Finding the largest repeat in that window and setting the current row's type to that type.
     3. Grouping sequences of repeats of the same type.
     4. Merging the group and recalculating the start, end, and distance of the merged repeat.
 
-    This helps find the position of the HOR array.
+    This helps find the position of HOR arrays.
 
     ### Args
     `df`
