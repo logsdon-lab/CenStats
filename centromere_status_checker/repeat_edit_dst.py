@@ -26,7 +26,7 @@ def get_contig_similarity_by_edit_dst(
     dfs_filtered_ort_same_chr_res = []
 
     edit_distance_thr_filter = pl.col("dst_perc") < dst_perc_thr
-    edit_distance_highest_dst_filter = pl.col("dst_perc") == pl.col("dst_perc").min()
+    edit_distance_lowest_dst_filter = pl.col("dst_perc") == pl.col("dst_perc").min()
 
     for contig, df_edit_distance_res_grp in df_edit_distance_res.group_by(["contig"]):
         mtch_chr_name = re.search(RGX_CHR, contig[0])
@@ -49,12 +49,12 @@ def get_contig_similarity_by_edit_dst(
         # If none found, default to highest number of matches.
         if df_filter_edit_distance_res_grp.is_empty():
             df_filter_edit_distance_res_grp = df_edit_distance_res_grp.filter(
-                edit_distance_highest_dst_filter
+                edit_distance_lowest_dst_filter
             )
 
         if df_filter_ort_res_same_chr_grp.is_empty():
             df_filter_ort_res_same_chr_grp = df_edit_distance_res_same_chr_grp.filter(
-                edit_distance_highest_dst_filter
+                edit_distance_lowest_dst_filter
             )
 
         dfs_filtered_edit_distance_res.append(df_filter_edit_distance_res_grp)
