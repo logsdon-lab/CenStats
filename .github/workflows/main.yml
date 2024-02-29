@@ -16,9 +16,10 @@ jobs:
 
     - name: Install dependencies.
       run: |
-        make venv && make build
-        pip install dist/*.whl pytest
+        make venv && make build && make install
+        venv/bin/python -m pip install pytest
 
     - name: Run tests.
       run: |
+        source venv/bin/activate
         pytest -s

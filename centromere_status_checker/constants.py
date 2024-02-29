@@ -29,3 +29,4 @@ RGX_CHR = re.compile(r"(chr[0-9XY]+)")
 DST_PERC_THR = 0.3
 EDGE_LEN = 100_000
 EDGE_PERC_ALR_THR = 0.7
+HOR_LEN_THR = 200_000

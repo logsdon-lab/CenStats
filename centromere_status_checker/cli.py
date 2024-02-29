@@ -3,21 +3,26 @@ import sys
 import argparse
 import polars as pl
 import editdistance
+from loguru import logger
 from typing import TextIO
 
 from .orientation import Orientation
 from .repeat_jaccard_index import jaccard_index, get_contig_similarity_by_jaccard_index
 from .repeat_edit_dst import get_contig_similarity_by_edit_dst
-from .acrocentrics import get_p_arm_acro_chr, flatten_repeats
+from .acrocentrics import get_q_arm_acro_chr, flatten_repeats
 from .constants import (
     ACROCENTRIC_CHROMOSOMES,
     RGX_CHR,
     EDGE_LEN,
     EDGE_PERC_ALR_THR,
     DST_PERC_THR,
+    HOR_LEN_THR,
 )
+from .reference import split_ref_rm_input_by_contig
 from .reader import read_repeatmasker_output
 from .partial_cen import is_partial_centromere
+
+logger.add(sys.stderr, level="INFO")
 
 
 def join_summarize_results(
@@ -67,6 +72,9 @@ def join_summarize_results(
             )
             .otherwise(pl.col("reorient")),
         )
+        # Take only first row per contig.
+        .group_by("contig", maintain_order=True)
+        .first()
     )
 
 
@@ -90,28 +98,52 @@ def check_cens_status(
     jcontigs, jrefs, jindex = [], [], []
     pcontigs, pstatus = [], []
 
+    # Split ref dataframe by chromosome.
+    df_ref_grps = dict(split_ref_rm_input_by_contig(df_ref))
+    logger.info(f"Read {len(df_ref_grps)} reference dataframes.")
+
     for ctg, df_ctg_grp in df_ctg.group_by(["contig"]):
-        ctg = ctg[0]
-        mtch_chr_name = re.search(RGX_CHR, ctg)
+        logger.info(f"Evaluating {ctg} with {df_ctg_grp.shape[0]} repeats.")
+
+        ctg_name = ctg[0]
+        mtch_chr_name = re.search(RGX_CHR, ctg_name)
         if not mtch_chr_name:
             continue
         chr_name = mtch_chr_name.group()
 
+        # Check if partial ctg.
+        pcontigs.append(ctg_name)
+        pstatus.append(
+            is_partial_centromere(
+                df_ctg_grp, edge_len=edge_len, edge_perc_alr_thr=edge_perc_alr_thr
+            )
+        )
+        df_flatten_ctg_grp = flatten_repeats(df_ctg_grp)
+        ctg_num_hor_arrays = len(
+            df_flatten_ctg_grp.filter(
+                (pl.col("type") == "ALR/Alpha") & (pl.col("dst") > HOR_LEN_THR)
+            )
+        )
+
         # For acros (13, 14, 15, 21, 21)
-        # Adjust edit distance to only use p-arm of chr.
+        # Adjust metrics to only use q-arm of chr.
         if chr_name in ACROCENTRIC_CHROMOSOMES:
-            df_ctg_grp = get_p_arm_acro_chr(flatten_repeats(df_ctg_grp))
+            df_q_arm_ctg_grp = get_q_arm_acro_chr(df_flatten_ctg_grp)
 
-        for ref, df_ref_grp in df_ref.group_by(["contig"]):
-            ref = ref[0]
-            mtch_ref_chr_name = re.search(RGX_CHR, ctg)
-            if not mtch_ref_chr_name:
-                continue
-            ref_chr_name = mtch_ref_chr_name.group()
-
-            # Also adjust for reference acrocentrics.
-            if ref_chr_name in ACROCENTRIC_CHROMOSOMES:
-                df_ref_grp = get_p_arm_acro_chr(flatten_repeats(df_ref_grp))
+        for ref_name, ref_ctg in df_ref_grps.items():
+            # Check difference in number of HOR arrays between two contigs to determine if use acro q-arm.
+            # If greater than or equal to two, assume not the same chr and align to original contig instead of flattened.
+            if (
+                chr_name in ACROCENTRIC_CHROMOSOMES
+                and ref_name in ACROCENTRIC_CHROMOSOMES
+                and abs(ctg_num_hor_arrays - ref_ctg.num_hor_arrays) < 3
+            ):
+                # The flat_df is also just the q-arm
+                df_ref_grp = ref_ctg.flat_df
+                df_ctg_grp = df_q_arm_ctg_grp
+            else:
+                df_ref_grp = ref_ctg.df
+                df_ctg_grp = df_ctg_grp
 
             dst_fwd = editdistance.eval(
                 df_ref_grp["type"].to_list(),
@@ -125,25 +157,18 @@ def check_cens_status(
             repeat_type_jindex = jaccard_index(
                 set(df_ref_grp["type"]), set(df_ctg_grp["type"])
             )
-            jcontigs.append(ctg)
-            jrefs.append(ref)
+            jcontigs.append(ctg_name)
+            jrefs.append(ref_name)
             jindex.append(repeat_type_jindex)
 
-            contigs.append(ctg)
-            contigs.append(ctg)
-            refs.append(ref)
-            refs.append(ref)
+            contigs.append(ctg_name)
+            contigs.append(ctg_name)
+            refs.append(ref_name)
+            refs.append(ref_name)
             orts.append(Orientation.Forward)
             orts.append(Orientation.Reverse)
             dsts.append(dst_fwd)
             dsts.append(dst_rev)
-
-        pcontigs.append(ctg)
-        pstatus.append(
-            is_partial_centromere(
-                df_ctg_grp, edge_len=edge_len, edge_perc_alr_thr=edge_perc_alr_thr
-            )
-        )
 
     df_jaccard_index_res = get_contig_similarity_by_jaccard_index(
         jcontigs, jrefs, jindex
@@ -164,6 +189,8 @@ def check_cens_status(
     )
 
     res.write_csv(output, include_header=False, separator="\t")
+    logger.info("Finished checking centromeres.")
+
     return 0
 
 
