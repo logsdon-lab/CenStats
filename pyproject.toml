@@ -25,10 +25,10 @@ version = "0.0.1"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["cen-stats*"]
+include = ["cen_stats*"]
 exclude = ["docs*", "test*"]
 
 [tool.setuptools_scm]
 
 [project.scripts]
-cen_stats = "cen_stats.cli:main"
+cen-stats = "cen_stats.cli:main"

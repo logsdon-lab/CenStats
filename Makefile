@@ -1,7 +1,11 @@
-.PHONY: build test venv clean install
+.PHONY: build test venv clean install upload
 
 BIN=$(shell pwd)/venv/bin/
 PROJECT_NAME=cen-stats
+
+test:
+	$(BIN)python3 -m pip install pytest
+	$(BIN)python3 -m pytest -vv
 
 build:
 	$(MAKE) clean
@@ -16,7 +20,7 @@ venv:
 	python3 -m venv venv
 
 clean:
-	rm -rf dist/
+	rm -rf dist/ *.egg-info .*_cache
 
 upload:
 	$(BIN)python3 -m pip install --upgrade twine
