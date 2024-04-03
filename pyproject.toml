@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "centromere_status_checker"
+name = "cen-stats"
 authors = [
     {name = "Keith Oshima", email = "oshimak@pennmedicine.upenn.edu"},
 ]
@@ -19,16 +19,16 @@ dependencies = [
     "loguru",
     "editdistance"
 ]
-dynamic = ["version"]
+version = "0.0.1"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["centromere_status_checker*"]
+include = ["cen-stats*"]
 exclude = ["docs*", "test*"]
 
 [tool.setuptools_scm]
 
 [project.scripts]
-cens-status = "centromere_status_checker.cli:main"
+cen_stats = "cen_stats.cli:main"

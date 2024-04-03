@@ -1,11 +1,11 @@
-# Centromere Status Checker
+# `cen-stats`
 [![CI](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml)
 
 Determine the status of centromeric contigs based on [`RepeatMasker`](https://www.repeatmasker.org/) annotations.
 
 ### Setup
 ```bash
-pip install centromere_status_checker
+pip install git+https://github.com/logsdon-lab/cen-stats.git
 ```
 
 ### Usage

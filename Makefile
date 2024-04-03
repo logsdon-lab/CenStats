@@ -1,9 +1,7 @@
 .PHONY: build test venv clean install
 
 BIN=$(shell pwd)/venv/bin/
-PROJECT_NAME=centromere_status_checker
-
-# test:
+PROJECT_NAME=cen-stats
 
 build:
 	$(MAKE) clean
