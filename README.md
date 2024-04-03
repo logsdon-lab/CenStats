@@ -11,7 +11,7 @@ pip install git+https://github.com/logsdon-lab/cen-stats.git
 ### Usage
 Takes `RepeatMasker` output from centromeric contigs to check and centromeric contigs from a reference.
 ```bash
-cens-status -i input_cens.out -r ref_cens.out > cens_status.tsv
+cen-stats -i input_cens.out -r ref_cens.out > cens_status.tsv
 ```
 
 Return tab-delimited output with the following fields:
@@ -58,7 +58,7 @@ Two metrics are used to determine orientation and mapping.
 ### Build
 ```bash
 make venv && make build && make install
-source venv/bin/activate && cens-status -h
+source venv/bin/activate && cen-stats -h
 ```
 
 To run tests:
