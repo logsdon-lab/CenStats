@@ -1,6 +1,6 @@
 import polars as pl
 
-from .constants import EDGE_LEN, EDGE_PERC_ALR_THR
+from .constants import EDGE_LEN, EDGE_PERC_ALR_THR, HOR_LEN_THR
 
 
 def is_partial_centromere(
@@ -8,6 +8,7 @@ def is_partial_centromere(
     *,
     edge_len: int = EDGE_LEN,
     edge_perc_alr_thr: float = EDGE_PERC_ALR_THR,
+    max_alr_len_thr: int = HOR_LEN_THR,
 ) -> bool:
     """
     Check if centromere is partially constructed based on ALR percentage at either ends of the contig.
@@ -48,4 +49,13 @@ def is_partial_centromere(
     except Exception:
         redge_perc_alr = 0.0
 
-    return ledge_perc_alr > edge_perc_alr_thr or redge_perc_alr > edge_perc_alr_thr
+    # Check if edges have ALR.
+    are_edges_alr = (
+        ledge_perc_alr > edge_perc_alr_thr or redge_perc_alr > edge_perc_alr_thr
+    )
+    # If they don't, check that the contig has at least one ALR that meets the minimum threshold len.
+    if not are_edges_alr:
+        max_alr_len = df.filter(pl.col("type") == "ALR/Alpha").get_column("dst").max()
+        return max_alr_len < max_alr_len_thr
+
+    return are_edges_alr
