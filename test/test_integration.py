@@ -13,6 +13,10 @@ import subprocess
             "test/chr22_cens.fa.out",
             "test/correct_chr22_cens.tsv",
         ),
+        (
+            "test/chr21_cens_partials.fa.out",
+            "test/correct_chr21_partials_cens.tsv",
+        ),
     ],
 )
 def test_check_cens_status(input_rm_out: str, expected_rc_list: str):
