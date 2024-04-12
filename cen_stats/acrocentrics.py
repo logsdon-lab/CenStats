@@ -26,7 +26,7 @@ def determine_acro_p_arm_ort(df: pl.DataFrame) -> tuple[Orientation, pl.DataFram
     abs_dst_to_start = abs(start_bp_pos - largest_alr_repeat_mdpt_pos)
     abs_dst_to_end = abs(end_bp_pos - largest_alr_repeat_mdpt_pos)
 
-    if abs_dst_to_start < abs_dst_to_end:
+    if abs_dst_to_start > abs_dst_to_end:
         return (Orientation.Forward, largest_alr_repeat)
     else:
         return (Orientation.Reverse, largest_alr_repeat)
