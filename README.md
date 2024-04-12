@@ -10,6 +10,29 @@ pip install git+https://github.com/logsdon-lab/cen-stats.git
 
 ### Usage
 Takes `RepeatMasker` output from centromeric contigs to check and centromeric contigs from a reference.
+```
+usage: cen-stats [-h] -i INPUT [-o OUTPUT] -r REFERENCE [--dst_perc_thr DST_PERC_THR] [--edge_perc_alr_thr EDGE_PERC_ALR_THR] [--edge_len EDGE_LEN]
+                 [--max_alr_len_thr MAX_ALR_LEN_THR]
+
+Determines if centromeres are incorrectly oriented/mapped with respect to a reference.
+
+options:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        Input RepeatMasker output. Should contain contig reference. Expects no header.
+  -o OUTPUT, --output OUTPUT
+                        List of contigs with actions required to fix.
+  -r REFERENCE, --reference REFERENCE
+                        Reference RM dataframe.
+  --dst_perc_thr DST_PERC_THR
+                        Edit distance percentile threshold. Lower is more stringent.
+  --edge_perc_alr_thr EDGE_PERC_ALR_THR
+                        Percent ALR on edges of contig to be considered a partial centromere.
+  --edge_len EDGE_LEN   Edge len to calculate edge_perc_alr_thr.
+  --max_alr_len_thr MAX_ALR_LEN_THR
+                        Length of largest ALR needed in a contig to not be considered a partial centromere.
+```
+
 ```bash
 cen-stats -i input_cens.out -r ref_cens.out > cens_status.tsv
 ```
@@ -43,6 +66,9 @@ Two metrics are used to determine orientation and mapping.
 
 3. Partial contigs are checked by calculating the percentage of `ALR/Alpha` repeat types along the edges of the contig.
     * If the percentage is greater than a set threshold, the contig is considered partial.
+    * If the above condition is not met, also check the length of the largest ALR repeat found.
+        * If does not meet a set threshold, consider the contig as partial.
+        * This handles edges cases for chr21 and chr22 contigs which have only have the q-arm which would meet the first condition but miss the central ALR.
 
 4. The results for each pair are grouped by contig and merged/filtered depending on the metric.
     * Jaccard index

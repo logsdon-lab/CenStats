@@ -22,6 +22,8 @@ def is_partial_centromere(
         Edge len to check. Defaults to 100 kbp.
     `edge_perc_alr_thr`
         ALR percentage threshold needed to be considered incomplete. Defaults to 70%.
+    `max_alr_len_thr`
+        Length threshold of largest ALR needed to be considered complete. Defaults to 200 kbp.
 
     ### Returns
     Whether the centromere is partially constructed.
