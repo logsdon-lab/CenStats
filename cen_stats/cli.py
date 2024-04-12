@@ -86,6 +86,7 @@ def check_cens_status(
     dst_perc_thr: float = DST_PERC_THR,
     edge_perc_alr_thr: float = EDGE_PERC_ALR_THR,
     edge_len: int = EDGE_LEN,
+    max_alr_len_thr: int = HOR_LEN_THR,
 ) -> int:
     df_ctg = read_repeatmasker_output(input_rm).collect()
     df_ref = (
@@ -115,7 +116,10 @@ def check_cens_status(
         pcontigs.append(ctg_name)
         pstatus.append(
             is_partial_centromere(
-                df_ctg_grp, edge_len=edge_len, edge_perc_alr_thr=edge_perc_alr_thr
+                df_ctg_grp,
+                edge_len=edge_len,
+                edge_perc_alr_thr=edge_perc_alr_thr,
+                max_alr_len_thr=max_alr_len_thr,
             )
         )
         df_flatten_ctg_grp = flatten_repeats(df_ctg_grp)
@@ -237,6 +241,12 @@ def main() -> int:
         type=int,
         help="Edge len to calculate edge_perc_alr_thr.",
     )
+    ap.add_argument(
+        "--max_alr_len_thr",
+        default=HOR_LEN_THR,
+        type=int,
+        help="Length of largest ALR needed in a contig to not be considered a partial centromere.",
+    )
     args = ap.parse_args()
 
     return check_cens_status(
@@ -246,6 +256,7 @@ def main() -> int:
         dst_perc_thr=args.dst_perc_thr,
         edge_len=args.edge_len,
         edge_perc_alr_thr=args.edge_perc_alr_thr,
+        max_alr_len_thr=args.max_alr_len_thr,
     )
 
 
