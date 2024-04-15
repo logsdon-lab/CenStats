@@ -30,6 +30,8 @@ def join_summarize_results(
     df_jaccard_index_res: pl.DataFrame,
     df_edit_distance_res: pl.DataFrame,
     df_edit_distance_same_chr_res: pl.DataFrame,
+    *,
+    reference_prefix: str,
 ) -> pl.DataFrame:
     return (
         # Join result dfs.
@@ -62,11 +64,8 @@ def join_summarize_results(
             final_contig=pl.col("contig").str.replace(
                 RGX_CHR.pattern, pl.col("final_contig")
             ),
-            # Never reorient if reference or chrY (ref doesn't contain chrY)
-            reorient=pl.when(
-                (pl.col("contig").str.starts_with("chm13"))
-                | (pl.col("contig").str.contains("chrY"))
-            )
+            # Never reorient if reference.
+            reorient=pl.when(pl.col("contig").str.starts_with(reference_prefix))
             .then(
                 pl.col("reorient").str.replace(Orientation.Reverse, Orientation.Forward)
             )
@@ -83,6 +82,7 @@ def check_cens_status(
     output: TextIO,
     reference_rm: str,
     *,
+    reference_prefix: str,
     dst_perc_thr: float = DST_PERC_THR,
     edge_perc_alr_thr: float = EDGE_PERC_ALR_THR,
     edge_len: int = EDGE_LEN,
@@ -91,7 +91,7 @@ def check_cens_status(
     df_ctg = read_repeatmasker_output(input_rm).collect()
     df_ref = (
         read_repeatmasker_output(reference_rm)
-        .filter(~pl.col("contig").str.starts_with("chm1"))
+        .filter(pl.col("contig").str.starts_with(reference_prefix))
         .collect()
     )
 
@@ -190,6 +190,7 @@ def check_cens_status(
         df_jaccard_index_res=df_jaccard_index_res,
         df_edit_distance_res=df_filter_edit_distance_res,
         df_edit_distance_same_chr_res=df_filter_ort_same_chr_res,
+        reference_prefix=reference_prefix,
     )
 
     res.write_csv(output, include_header=False, separator="\t")
@@ -247,12 +248,16 @@ def main() -> int:
         type=int,
         help="Length of largest ALR needed in a contig to not be considered a partial centromere.",
     )
+    ap.add_argument(
+        "--reference_prefix", default="chm13", type=str, help="Reference prefix."
+    )
     args = ap.parse_args()
 
     return check_cens_status(
         args.input,
         args.output,
         args.reference,
+        reference_prefix=args.reference_prefix,
         dst_perc_thr=args.dst_perc_thr,
         edge_len=args.edge_len,
         edge_perc_alr_thr=args.edge_perc_alr_thr,
