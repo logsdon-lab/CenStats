@@ -49,7 +49,7 @@ def get_q_arm_acro_chr(df_ctg_grp: pl.DataFrame) -> pl.DataFrame:
         return df_ctg_grp.filter(pl.col("start") > alr_repeat["end"][0])
     # | q | alr | p |
     else:
-        return df_ctg_grp.filter(pl.col("end") > alr_repeat["start"][0])
+        return df_ctg_grp.filter(pl.col("end") < alr_repeat["start"][0])
 
 
 def flatten_repeats(df: pl.DataFrame, *, window_size=5) -> pl.DataFrame:

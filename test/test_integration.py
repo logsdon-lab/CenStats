@@ -17,6 +17,10 @@ import subprocess
             "test/chr21_cens_partials.fa.out",
             "test/correct_chr21_partials_cens.tsv",
         ),
+        (
+            "test/chr21_chr13_mismap.fa.out",
+            "test/correct_chr21_chr13_mismap_cens.tsv",
+        ),
     ],
 )
 def test_check_cens_status(input_rm_out: str, expected_rc_list: str):
