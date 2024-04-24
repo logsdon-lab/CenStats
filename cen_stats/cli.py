@@ -22,8 +22,6 @@ from .reference import split_ref_rm_input_by_contig
 from .reader import read_repeatmasker_output
 from .partial_cen import is_partial_centromere
 
-logger.add(sys.stderr, level="INFO")
-
 
 def join_summarize_results(
     df_partial_contig_res: pl.DataFrame,
@@ -104,9 +102,9 @@ def check_cens_status(
     logger.info(f"Read {len(df_ref_grps)} reference dataframes.")
 
     for ctg, df_ctg_grp in df_ctg.group_by(["contig"]):
-        logger.info(f"Evaluating {ctg} with {df_ctg_grp.shape[0]} repeats.")
-
         ctg_name = ctg[0]
+        logger.info(f"Evaluating {ctg_name} with {df_ctg_grp.shape[0]} repeats.")
+
         mtch_chr_name = re.search(RGX_CHR, ctg_name)
         if not mtch_chr_name:
             continue

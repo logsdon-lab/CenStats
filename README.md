@@ -58,7 +58,6 @@ Two metrics are used to determine orientation and mapping.
 ### Algorithm
 1. Every centromeric contig and its reverse orientation is paired with a reference centromeric contig.
     * Repeat types are used to gauge similarity.
-    * Complexity is reduced by merging certain repeat types.
 
 2. Next, the both metrics are calculated for each pair.
     * If both chromosomes in a pair are acrocentric and have similar number of HOR arrays, then only repeats along the q-arm are used.
