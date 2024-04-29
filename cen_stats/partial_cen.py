@@ -31,7 +31,7 @@ def is_partial_centromere(
     # Check if partial centromere based on ALR perc on ends.
     # Check N kbp from start and end of contig.
     ledge = df.filter(pl.col("end") < df[0]["end"] + edge_len)
-    redge = df.filter(pl.col("end") > df[-1]["end"] - edge_len)
+    redge = df.filter(pl.col("start") > df[-1]["end"] - edge_len)
     try:
         ledge_perc_alr = (
             ledge.group_by("type")
@@ -39,8 +39,8 @@ def is_partial_centromere(
             .filter(pl.col("type") == "ALR/Alpha")
             .row(0)[1]
         )
-    except Exception:
-        ledge_perc_alr = 0.0
+    except pl.exceptions.OutOfBoundsError:
+        ledge_perc_alr = 0.0 if not ledge.is_empty() else 100.0
     try:
         redge_perc_alr = (
             redge.group_by("type")
@@ -48,8 +48,8 @@ def is_partial_centromere(
             .filter(pl.col("type") == "ALR/Alpha")
             .row(0)[1]
         )
-    except Exception:
-        redge_perc_alr = 0.0
+    except pl.exceptions.OutOfBoundsError:
+        redge_perc_alr = 0.0 if not redge.is_empty() else 100.0
 
     # Check if edges have ALR.
     are_edges_alr = (

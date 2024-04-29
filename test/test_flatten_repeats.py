@@ -8,14 +8,14 @@ from cen_stats.reader import read_repeatmasker_output
     ["input_rm", "contig", "df_exp"],
     [
         (
-            "test/chr22_cens.fa.out",
+            "test/input/chr22_cens.fa.out",
             "HG00171_chr22_haplotype1-0000002:2413947-12672095",
             pl.DataFrame(
                 {"start": 4647309, "end": 8633895, "type": "ALR/Alpha", "dst": 3986586}
             ),
         ),
         (
-            "test/chr21_cens.fa.out",
+            "test/input/chr21_cens.fa.out",
             "HG00171_chr21_haplotype1-0000029:4196961-10792258",
             pl.DataFrame(
                 {"start": 4560509, "end": 6086655, "type": "ALR/Alpha", "dst": 1526146}
@@ -38,7 +38,7 @@ def test_flatten_repeats_to_find_largest_alr(input_rm, contig, df_exp):
     ["input_rm", "contig", "df_exp"],
     [
         (
-            "test/chr21_cens.fa.out",
+            "test/input/chr21_cens.fa.out",
             "HG00171_chr21_haplotype2-0000154:33297526-38584922",
             pl.DataFrame(
                 {
@@ -50,7 +50,7 @@ def test_flatten_repeats_to_find_largest_alr(input_rm, contig, df_exp):
             ),
         ),
         (
-            "test/chr22_cens.fa.out",
+            "test/input/chr22_cens.fa.out",
             "chm13_chr22:8000001-17400000",
             pl.DataFrame(
                 {
