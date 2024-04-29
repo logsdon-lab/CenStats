@@ -6,20 +6,24 @@ import subprocess
     "input_rm_out,expected_rc_list",
     [
         (
-            "test/chr21_cens.fa.out",
-            "test/correct_chr21_cens.tsv",
+            "test/input/chr21_cens.fa.out",
+            "test/expected/correct_chr21_cens.tsv",
         ),
         (
-            "test/chr22_cens.fa.out",
-            "test/correct_chr22_cens.tsv",
+            "test/input/chr22_cens.fa.out",
+            "test/expected/correct_chr22_cens.tsv",
         ),
         (
-            "test/chr21_cens_partials.fa.out",
-            "test/correct_chr21_partials_cens.tsv",
+            "test/input/chr21_cens_partials.fa.out",
+            "test/expected/correct_chr21_cens_partials.tsv",
         ),
         (
-            "test/chr21_chr13_mismap.fa.out",
-            "test/correct_chr21_chr13_mismap_cens.tsv",
+            "test/input/chr21_chr13_cens_mismap.fa.out",
+            "test/expected/correct_chr21_chr13_cens_mismap.tsv",
+        ),
+        (
+            "test/input/chr9_cens_partials.fa.out",
+            "test/expected/correct_chr9_cens_partials.tsv",
         ),
     ],
 )
@@ -30,7 +34,7 @@ def test_check_cens_status(input_rm_out: str, expected_rc_list: str):
             "-i",
             input_rm_out,
             "-r",
-            "test/chm13_chm1_cens_v21.trimmed.fa.noheader.out",
+            "test/input/chm13_chm1_cens_v21.trimmed.fa.noheader.out",
         ],
         capture_output=True,
         check=True,
