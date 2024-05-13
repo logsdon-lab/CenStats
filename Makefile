@@ -1,7 +1,7 @@
 .PHONY: build test venv clean install upload
 
 BIN=$(shell pwd)/venv/bin/
-PROJECT_NAME=cen-stats
+PROJECT_NAME=censtats
 
 test:
 	$(BIN)python3 -m pip install pytest

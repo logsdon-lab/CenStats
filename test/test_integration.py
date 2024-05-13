@@ -30,7 +30,7 @@ import subprocess
 def test_check_cens_status(input_rm_out: str, expected_rc_list: str):
     process = subprocess.run(
         [
-            "cen-stats",
+            "censtats",
             "-i",
             input_rm_out,
             "-r",

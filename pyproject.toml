@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cen-stats"
+name = "CenStats"
 authors = [
     {name = "Keith Oshima", email = "oshimak@pennmedicine.upenn.edu"},
 ]
@@ -25,10 +25,10 @@ version = "0.0.1"
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["cen_stats*"]
+include = ["censtats*"]
 exclude = ["docs*", "test*"]
 
 [tool.setuptools_scm]
 
 [project.scripts]
-cen-stats = "cen_stats.cli:main"
+censtats = "censtats.cli:main"

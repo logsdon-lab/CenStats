@@ -1,17 +1,17 @@
-# `cen-stats`
+# `CenStats`
 [![CI](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml)
 
 Determine the status of centromeric contigs based on [`RepeatMasker`](https://www.repeatmasker.org/) annotations.
 
 ### Setup
 ```bash
-pip install git+https://github.com/logsdon-lab/cen-stats.git
+pip install git+https://github.com/logsdon-lab/CenStats.git
 ```
 
 ### Usage
 Takes `RepeatMasker` output from centromeric contigs to check and centromeric contigs from a reference.
 ```
-usage: cen-stats [-h] -i INPUT [-o OUTPUT] -r REFERENCE [--dst_perc_thr DST_PERC_THR] [--edge_perc_alr_thr EDGE_PERC_ALR_THR] [--edge_len EDGE_LEN]
+usage: censtats [-h] -i INPUT [-o OUTPUT] -r REFERENCE [--dst_perc_thr DST_PERC_THR] [--edge_perc_alr_thr EDGE_PERC_ALR_THR] [--edge_len EDGE_LEN]
                  [--max_alr_len_thr MAX_ALR_LEN_THR]
 
 Determines if centromeres are incorrectly oriented/mapped with respect to a reference.
@@ -34,7 +34,7 @@ options:
 ```
 
 ```bash
-cen-stats -i input_cens.out -r ref_cens.out > cens_status.tsv
+censtats -i input_cens.out -r ref_cens.out > cens_status.tsv
 ```
 
 Return tab-delimited output with the following fields:
@@ -83,7 +83,7 @@ Two metrics are used to determine orientation and mapping.
 ### Build
 ```bash
 make venv && make build && make install
-source venv/bin/activate && cen-stats -h
+source venv/bin/activate && censtats -h
 ```
 
 To run tests:

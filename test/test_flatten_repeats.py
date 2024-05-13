@@ -1,7 +1,7 @@
 import pytest
 import polars as pl
-from cen_stats.acrocentrics import flatten_repeats
-from cen_stats.reader import read_repeatmasker_output
+from censtats.acrocentrics import flatten_repeats
+from censtats.reader import read_repeatmasker_output
 
 
 @pytest.mark.parametrize(
