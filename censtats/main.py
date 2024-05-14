@@ -10,7 +10,7 @@ else:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Centromere statistics tool kit.")
+    ap = argparse.ArgumentParser(description="Centromere statistics toolkit.")
     sub_ap = ap.add_subparsers(dest="cmd")
     add_status_cli(sub_ap)
 
