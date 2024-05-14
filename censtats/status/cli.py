@@ -6,18 +6,20 @@ import editdistance
 from loguru import logger
 from typing import TextIO, TYPE_CHECKING, Any
 
-from .orientation import Orientation
 from .repeat_jaccard_index import jaccard_index, get_contig_similarity_by_jaccard_index
 from .repeat_edit_dst import get_contig_similarity_by_edit_dst
 from .acrocentrics import get_q_arm_acro_chr, flatten_repeats
 from .constants import (
     ACROCENTRIC_CHROMOSOMES,
+    CHROMOSOMES_13_21,
+    CHROMOSOMES_14_22,
+    MAX_ALR_LEN_THR,
     RGX_CHR,
     EDGE_LEN,
     EDGE_PERC_ALR_THR,
     DST_PERC_THR,
-    HOR_LEN_THR,
 )
+from .orientation import Orientation
 from .reference import split_ref_rm_input_by_contig
 from .reader import read_repeatmasker_output
 from .partial_cen import is_partial_centromere
@@ -37,9 +39,7 @@ def join_summarize_results(
     *,
     reference_prefix: str,
 ) -> pl.DataFrame:
-    return (
-        # Join result dfs.
-        # use partial contig res so always get all contigs.
+    df_joined = (
         df_partial_contig_res.join(
             df_jaccard_index_res.join(df_edit_distance_res, on="contig")
             .group_by("contig")
@@ -49,7 +49,11 @@ def join_summarize_results(
         )
         # Add default ort per contig.
         .join(df_edit_distance_same_chr_res, on="contig", how="left")
-        .select(
+        .with_columns(ctg_chr=pl.col("contig").str.extract(RGX_CHR.pattern))
+    )
+
+    return (
+        df_joined.select(
             contig=pl.col("contig"),
             # Extract chromosome name.
             # Both results must concur.
@@ -90,7 +94,9 @@ def check_cens_status(
     dst_perc_thr: float = DST_PERC_THR,
     edge_perc_alr_thr: float = EDGE_PERC_ALR_THR,
     edge_len: int = EDGE_LEN,
-    max_alr_len_thr: int = HOR_LEN_THR,
+    max_alr_len_thr: int = MAX_ALR_LEN_THR,
+    restrict_13_21: bool = False,
+    restrict_14_22: bool = False,
 ) -> int:
     df_ctg = read_repeatmasker_output(input_rm).collect()
     df_ref = (
@@ -118,40 +124,37 @@ def check_cens_status(
 
         # Check if partial ctg.
         pcontigs.append(ctg_name)
-        pstatus.append(
-            is_partial_centromere(
-                df_ctg_grp,
-                edge_len=edge_len,
-                edge_perc_alr_thr=edge_perc_alr_thr,
-                max_alr_len_thr=max_alr_len_thr,
-            )
+        is_partial = is_partial_centromere(
+            df_ctg_grp,
+            edge_len=edge_len,
+            edge_perc_alr_thr=edge_perc_alr_thr,
+            max_alr_len_thr=max_alr_len_thr,
         )
+        pstatus.append(is_partial)
+
         df_flatten_ctg_grp = flatten_repeats(df_ctg_grp)
-        ctg_num_hor_arrays = len(
-            df_flatten_ctg_grp.filter(
-                (pl.col("type") == "ALR/Alpha") & (pl.col("dst") > HOR_LEN_THR)
-            )
-        )
 
         # For acros (13, 14, 15, 21, 21)
         # Adjust metrics to only use q-arm of chr.
         if chr_name in ACROCENTRIC_CHROMOSOMES:
-            df_q_arm_ctg_grp = get_q_arm_acro_chr(df_flatten_ctg_grp)
+            df_ctg_grp = get_q_arm_acro_chr(df_flatten_ctg_grp)
 
         for ref_name, ref_ctg in df_ref_grps.items():
-            # Check difference in number of HOR arrays between two contigs to determine if really acrocentric chr.
-            # If diff in num of HOR arrays less than 3, assume same chr and align to q-arm.
-            if (
-                chr_name in ACROCENTRIC_CHROMOSOMES
-                and ref_name in ACROCENTRIC_CHROMOSOMES
-                and abs(ctg_num_hor_arrays - ref_ctg.num_hor_arrays) < 3
-            ):
+            if ref_ctg.chr in ACROCENTRIC_CHROMOSOMES:
                 # The flat_df is also just the q-arm
                 df_ref_grp = ref_ctg.flat_df
-                df_ctg_grp = df_q_arm_ctg_grp
             else:
                 df_ref_grp = ref_ctg.df
-                df_ctg_grp = df_ctg_grp
+
+            # Special case for 13 and 21 and 14 and 22.
+            if (
+                (chr_name in CHROMOSOMES_13_21 and ref_ctg.chr not in CHROMOSOMES_13_21)
+                and restrict_13_21
+            ) or (
+                (chr_name in CHROMOSOMES_14_22 and ref_ctg.chr not in CHROMOSOMES_14_22)
+                and restrict_14_22
+            ):
+                continue
 
             dst_fwd = editdistance.eval(
                 df_ref_grp["type"].to_list(),
@@ -249,12 +252,22 @@ def add_status_cli(parser: SubArgumentParser) -> None:
     )
     ap.add_argument(
         "--max_alr_len_thr",
-        default=HOR_LEN_THR,
+        default=MAX_ALR_LEN_THR,
         type=int,
         help="Length of largest ALR needed in a contig to not be considered a partial centromere.",
     )
     ap.add_argument(
         "--reference_prefix", default="chm13", type=str, help="Reference prefix."
+    )
+    ap.add_argument(
+        "--restrict_13_21",
+        action="store_true",
+        help="Restrict mapping to chromosomes 13 and 21 for chr13 and chr21 contigs.",
+    )
+    ap.add_argument(
+        "--restrict_14_22",
+        action="store_true",
+        help="Restrict mapping to chromosomes 14 and 22 for chr14 and chr22 contigs.",
     )
 
     return None

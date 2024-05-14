@@ -26,6 +26,8 @@ def main() -> int:
             edge_len=args.edge_len,
             edge_perc_alr_thr=args.edge_perc_alr_thr,
             max_alr_len_thr=args.max_alr_len_thr,
+            restrict_13_21=args.restrict_13_21,
+            restrict_14_22=args.restrict_14_22,
         )
     elif args.cmd == "length":
         raise NotImplementedError("Length command not implemented.")

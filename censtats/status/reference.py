@@ -2,14 +2,14 @@ import re
 import polars as pl
 from typing import NamedTuple, Generator
 from .acrocentrics import flatten_repeats, get_q_arm_acro_chr
-from .constants import ACROCENTRIC_CHROMOSOMES, HOR_LEN_THR, RGX_CHR
+from .constants import ACROCENTRIC_CHROMOSOMES, RGX_CHR
 
 
 class RefCenContigs(NamedTuple):
+    chr: str
     ref: str
     df: pl.DataFrame
     flat_df: pl.DataFrame
-    num_hor_arrays: int
 
 
 def split_ref_rm_input_by_contig(
@@ -24,13 +24,8 @@ def split_ref_rm_input_by_contig(
         ref_chr_name = mtch_ref_chr_name.group()
 
         df_ref_flatten_grp = flatten_repeats(df_ref_grp)
-        num_hor_arrays = len(
-            df_ref_flatten_grp.filter(
-                (pl.col("type") == "ALR/Alpha") & (pl.col("dst") > HOR_LEN_THR)
-            )
-        )
         # Also adjust for reference acrocentrics.
         if ref_chr_name in ACROCENTRIC_CHROMOSOMES:
             df_ref_flatten_grp = get_q_arm_acro_chr(df_ref_flatten_grp)
 
-        yield ref, RefCenContigs(ref, df_ref_grp, df_ref_flatten_grp, num_hor_arrays)
+        yield ref, RefCenContigs(ref_chr_name, ref, df_ref_grp, df_ref_flatten_grp)
