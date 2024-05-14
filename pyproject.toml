@@ -17,6 +17,9 @@ license = {text = "MIT License"}
 dynamic = ["dependencies"]
 version = "0.0.1"
 
+[project.urls]
+Homepage = "https://github.com/logsdon-lab/CenStats"
+
 [tool.setuptools]
 include-package-data = true
 
