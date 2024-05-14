@@ -1,6 +1,14 @@
 test/input/chr9_cens_partials.fa.out filter=lfs diff=lfs merge=lfs -text
 test/input/chm13_chm1_cens_v21.trimmed.fa.noheader.out filter=lfs diff=lfs merge=lfs -text
 test/input/chr21_cens.fa.out filter=lfs diff=lfs merge=lfs -text
-test/input/chr21_cens_partials.fa.out filter=lfs diff=lfs merge=lfs -text
 test/input/chr21_chr13_cens_mismap.fa.out filter=lfs diff=lfs merge=lfs -text
 test/input/chr22_cens.fa.out filter=lfs diff=lfs merge=lfs -text
+test/input/chr4_cens_partials.fa.out filter=lfs diff=lfs merge=lfs -text
+test/input/chr4_cens_partials.png filter=lfs diff=lfs merge=lfs -text
+test/input/chr9_cens_partials.png filter=lfs diff=lfs merge=lfs -text
+test/input/chm13_chm1_cens_v21.trimmed.fa.noheader.out.png filter=lfs diff=lfs merge=lfs -text
+test/input/chr21_cens_false_neg_mismap.png filter=lfs diff=lfs merge=lfs -text
+test/input/chr21_cens_false_neg_mismap.fa.out filter=lfs diff=lfs merge=lfs -text
+test/input/chr21_cens.png filter=lfs diff=lfs merge=lfs -text
+test/input/chr21_chr13_cens_mismap.png filter=lfs diff=lfs merge=lfs -text
+test/input/chr22_cens.png filter=lfs diff=lfs merge=lfs -text

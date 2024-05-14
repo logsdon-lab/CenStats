@@ -18,7 +18,8 @@ jobs:
 
     - name: Install dependencies.
       run: |
-        make venv && make build && make install
+        make venv
+        venv/bin/python -m pip install -r requirements.txt
         venv/bin/python -m pip install pytest
 
     - name: Run tests.

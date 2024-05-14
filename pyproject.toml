@@ -1,34 +1,31 @@
 [build-system]
-requires = [
-    "setuptools>=60",
-    "setuptools-scm>=8.0"
-]
+requires = ["setuptools>=60",]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
 [project]
-name = "cen-stats"
+name = "CenStats"
 authors = [
     {name = "Keith Oshima", email = "oshimak@pennmedicine.upenn.edu"},
 ]
-description = "Centromere status checker."
+description = "Centromere statistics toolkit."
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT License"}
-dependencies = [
-    "polars",
-    "loguru",
-    "editdistance"
-]
+dynamic = ["dependencies"]
 version = "0.0.1"
+
+[project.urls]
+Homepage = "https://github.com/logsdon-lab/CenStats"
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["cen_stats*"]
+include = ["censtats*"]
 exclude = ["docs*", "test*"]
 
-[tool.setuptools_scm]
-
 [project.scripts]
-cen-stats = "cen_stats.cli:main"
+censtats = "censtats.main:main"
