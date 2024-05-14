@@ -4,7 +4,7 @@ import argparse
 import polars as pl
 import editdistance
 from loguru import logger
-from typing import TextIO
+from typing import TextIO, TYPE_CHECKING, Any
 
 from .orientation import Orientation
 from .repeat_jaccard_index import jaccard_index, get_contig_similarity_by_jaccard_index
@@ -21,6 +21,12 @@ from .constants import (
 from .reference import split_ref_rm_input_by_contig
 from .reader import read_repeatmasker_output
 from .partial_cen import is_partial_centromere
+
+
+if TYPE_CHECKING:
+    SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
+else:
+    SubArgumentParser = Any
 
 
 def join_summarize_results(
@@ -197,9 +203,10 @@ def check_cens_status(
     return 0
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(
-        description="Determines if centromeres are incorrectly oriented/mapped with respect to a reference."
+def add_status_cli(parser: SubArgumentParser) -> None:
+    ap = parser.add_parser(
+        "status",
+        description="Determines if centromeres are incorrectly oriented/mapped with respect to a reference.",
     )
     ap.add_argument(
         "-i",
@@ -249,19 +256,5 @@ def main() -> int:
     ap.add_argument(
         "--reference_prefix", default="chm13", type=str, help="Reference prefix."
     )
-    args = ap.parse_args()
 
-    return check_cens_status(
-        args.input,
-        args.output,
-        args.reference,
-        reference_prefix=args.reference_prefix,
-        dst_perc_thr=args.dst_perc_thr,
-        edge_len=args.edge_len,
-        edge_perc_alr_thr=args.edge_perc_alr_thr,
-        max_alr_len_thr=args.max_alr_len_thr,
-    )
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
+    return None

@@ -30,7 +30,7 @@ def is_partial_centromere(
     """
     # Check if partial centromere based on ALR perc on ends.
     # Check N kbp from start and end of contig.
-    ledge = df.filter(pl.col("end") < df[0]["end"] + edge_len)
+    ledge = df.filter(pl.col("start") < edge_len)
     redge = df.filter(pl.col("start") > df[-1]["end"] - edge_len)
     try:
         ledge_perc_alr = (

@@ -25,12 +25,17 @@ import subprocess
             "test/input/chr9_cens_partials.fa.out",
             "test/expected/correct_chr9_cens_partials.tsv",
         ),
+        (
+            "test/input/chr4_cens_partials.fa.out",
+            "test/expected/correct_chr4_cens_partials.tsv",
+        ),
     ],
 )
 def test_check_cens_status(input_rm_out: str, expected_rc_list: str):
     process = subprocess.run(
         [
             "censtats",
+            "status",
             "-i",
             input_rm_out,
             "-r",

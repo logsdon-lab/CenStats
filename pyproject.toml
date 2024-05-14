@@ -1,8 +1,5 @@
 [build-system]
-requires = [
-    "setuptools>=60",
-    "setuptools-scm>=8.0"
-]
+requires = ["setuptools>=60",]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,7 +7,7 @@ name = "CenStats"
 authors = [
     {name = "Keith Oshima", email = "oshimak@pennmedicine.upenn.edu"},
 ]
-description = "Centromere status checker."
+description = "Centromere statistics toolkit."
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT License"}
@@ -28,7 +25,5 @@ include-package-data = true
 include = ["censtats*"]
 exclude = ["docs*", "test*"]
 
-[tool.setuptools_scm]
-
 [project.scripts]
-censtats = "censtats.cli:main"
+censtats = "censtats.main:main"
