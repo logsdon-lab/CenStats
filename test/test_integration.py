@@ -6,11 +6,7 @@ import subprocess
     ["input_rm_out", "expected_rc_list", "additional_args"],
     [
         ("test/input/chr21_cens.fa.out", "test/expected/correct_chr21_cens.tsv", ()),
-        # Partially incorrect due to only using q-arm. Actuall chr10.
-        # HG00171_chr22_haplotype2-0000170:38603708-44922516.
         ("test/input/chr22_cens.fa.out", "test/expected/correct_chr22_cens.tsv", ()),
-        # Partially incorrect. Using only q-arm means repeats to compare. edit distance between fwd and rev close.
-        # TODO: fix.
         (
             "test/input/chr21_chr13_cens_mismap.fa.out",
             "test/expected/correct_chr21_chr13_cens_mismap.tsv",

@@ -8,7 +8,7 @@ from typing import TextIO, TYPE_CHECKING, Any
 
 from .repeat_jaccard_index import jaccard_index, get_contig_similarity_by_jaccard_index
 from .repeat_edit_dst import get_contig_similarity_by_edit_dst
-from .acrocentrics import get_q_arm_acro_chr, flatten_repeats
+from .acrocentrics import get_q_arm_acro_chr
 from .constants import (
     ACROCENTRIC_CHROMOSOMES,
     CHROMOSOMES_13_21,
@@ -132,19 +132,13 @@ def check_cens_status(
         )
         pstatus.append(is_partial)
 
-        df_flatten_ctg_grp = flatten_repeats(df_ctg_grp)
-
         # For acros (13, 14, 15, 21, 21)
         # Adjust metrics to only use q-arm of chr.
         if chr_name in ACROCENTRIC_CHROMOSOMES:
-            df_ctg_grp = get_q_arm_acro_chr(df_flatten_ctg_grp)
+            df_ctg_grp = get_q_arm_acro_chr(df_ctg_grp)
 
         for ref_name, ref_ctg in df_ref_grps.items():
-            if ref_ctg.chr in ACROCENTRIC_CHROMOSOMES:
-                # The flat_df is also just the q-arm
-                df_ref_grp = ref_ctg.flat_df
-            else:
-                df_ref_grp = ref_ctg.df
+            df_ref_grp = ref_ctg.df
 
             # Special case for 13 and 21 and 14 and 22.
             if (
