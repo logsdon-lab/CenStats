@@ -2,6 +2,7 @@ import argparse
 from typing import Any, TYPE_CHECKING
 
 from .status.cli import add_status_cli, check_cens_status
+from .length.cli import add_hor_length_cli, calculate_hor_length
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
@@ -13,6 +14,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="Centromere statistics toolkit.")
     sub_ap = ap.add_subparsers(dest="cmd")
     add_status_cli(sub_ap)
+    add_hor_length_cli(sub_ap)
 
     args = ap.parse_args()
 
@@ -30,7 +32,9 @@ def main() -> int:
             restrict_14_22=args.restrict_14_22,
         )
     elif args.cmd == "length":
-        raise NotImplementedError("Length command not implemented.")
+        return calculate_hor_length(
+            args.input, args.bp_jump_thr, args.arr_len_thr, args.output
+        )
     else:
         raise ValueError(f"Unknown command: {args.cmd}")
 
