@@ -87,7 +87,7 @@ def get_q_arm_acro_chr(
         yield m
 
     return acro_arms.q_arm.with_columns(
-        pl.col("dst").apply(
+        pl.col("dst").map_elements(
             lambda x: list(split_repeats(x, bp_repeat_split)),
             return_dtype=pl.List(pl.Int64),
         )
