@@ -30,6 +30,7 @@ from test.helpers.integration import run_integration_test
             "test/status/expected/correct_chr4_cens_partials.tsv",
             (),
         ),
+        # Example of false negative unable to fix. Would need to isolate q-arm.
         (
             "test/status/input/chr21_cens_false_neg_mismap.fa.out",
             "test/status/expected/correct_chr21_cens_false_neg_mismap.tsv",

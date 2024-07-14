@@ -18,13 +18,6 @@ RM_COLS = [
     "y",
     "z",
 ]
-ACROCENTRIC_CHROMOSOMES = {
-    "chr13",
-    "chr14",
-    "chr15",
-    "chr21",
-    "chr22",
-}
 CHROMOSOMES_13_21 = {
     "chr13",
     "chr21",

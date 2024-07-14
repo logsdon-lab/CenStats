@@ -1,8 +1,54 @@
 import re
 import polars as pl
 
+from typing import Iterator, Optional
+
 from .orientation import Orientation
-from .constants import RGX_CHR
+from .constants import RGX_CHR, REPEAT_SPLIT_LEN
+
+
+def split_repeats(x: int, div: int) -> Iterator[int]:
+    """
+    Explodes/expands repeats per div.
+    * ex. div = 1000
+            * 2001 bp ALR = [1000 bp ALR, 1000 bp ALR, 1 bp ALR]
+    """
+    d, m = divmod(x, div)
+    for d in range(d):
+        yield div
+    yield m
+
+
+def expand_repeat_dst(
+    df_ctg_grp: pl.DataFrame,
+    *,
+    repeat_filter: Optional[pl.Expr] = None,
+    bp_repeat_split: int = REPEAT_SPLIT_LEN,
+) -> pl.DataFrame:
+    """
+    Expand the repeat distance.
+
+    ### Args
+    `df_ctg_grp`
+        RepeatMasker annotation dataframe of a single centromeric contig.
+    `repeat_filter`
+        Expression to filter and expand a subset of repeats.
+    `bp_repeat_split`
+        Number of base pairs to split the repeat by.
+
+    ### Returns
+    `pl.DataFrame` of expanded repeats.
+    """
+    return df_ctg_grp.with_columns(
+        pl.when(repeat_filter if repeat_filter is not None else False)
+        .then(
+            pl.col("dst").map_elements(
+                lambda x: list(split_repeats(x, bp_repeat_split)),
+                return_dtype=pl.List(pl.Int64),
+            )
+        )
+        .otherwise(pl.col("dst").cast(pl.List(pl.Int64)))
+    ).explode("dst")
 
 
 def get_contig_similarity_by_edit_dst(
