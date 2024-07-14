@@ -8,9 +8,7 @@ from typing import TextIO, TYPE_CHECKING, Any
 
 from .repeat_jaccard_index import jaccard_index, get_contig_similarity_by_jaccard_index
 from .repeat_edit_dst import get_contig_similarity_by_edit_dst
-from .acrocentrics import get_q_arm_acro_chr
 from .constants import (
-    ACROCENTRIC_CHROMOSOMES,
     CHROMOSOMES_13_21,
     CHROMOSOMES_14_22,
     MAX_ALR_LEN_THR,
@@ -131,11 +129,6 @@ def check_cens_status(
             max_alr_len_thr=max_alr_len_thr,
         )
         pstatus.append(is_partial)
-
-        # For acros (13, 14, 15, 21, 21)
-        # Adjust metrics to only use q-arm of chr.
-        if chr_name in ACROCENTRIC_CHROMOSOMES:
-            df_ctg_grp = get_q_arm_acro_chr(df_ctg_grp)
 
         for ref_name, ref_ctg in df_ref_grps.items():
             df_ref_grp = ref_ctg.df
