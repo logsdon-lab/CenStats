@@ -8,6 +8,8 @@ Centromere statistics toolkit.
     * Determine the status of centromeric contigs based on [`RepeatMasker`](https://www.repeatmasker.org/) annotations.
 * `length`
     * Estimate HOR array length from [`stv`](https://github.com/fedorrik/stv) bed file and [`HumAS-HMMER`](https://github.com/fedorrik/HumAS-HMMER_for_AnVIL) output.
+* `nonredundant`
+    * Get a non-redundant list of centromeres based on HOR array length from two AS-HOR array length lists. Uses output from `length` command.
 
 ### Setup
 ```bash
@@ -16,12 +18,12 @@ pip install censtats
 
 ### Usage
 ```bash
-usage: censtats [-h] {status,length} ...
+usage: censtats [-h] {status,length,nonredundant} ...
 
 Centromere statistics toolkit.
 
 positional arguments:
-  {status,length}
+  {status,length,nonredundant}
 
 options:
   -h, --help       show this help message and exit

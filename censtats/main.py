@@ -44,8 +44,6 @@ def main() -> int:
             args.outfile_left,
             args.outfile_right,
             args.outfile_both,
-            args.unaccounted_left,
-            args.unaccounted_right,
             args.duplicates_left,
             args.duplicates_right,
         )
