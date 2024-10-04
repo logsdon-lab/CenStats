@@ -23,11 +23,7 @@ def check_output(outputs: Outputs_To_Check) -> None:
             sorted_exp_res = sorted(
                 line.strip() for line in exp_res_fh.readlines() if line
             )
-            try:
-                assert sorted_in_res == sorted_exp_res
-            except AssertionError:
-                set(sorted_exp_res).difference(set(sorted_in_res))
-                breakpoint()
+            assert sorted_in_res == sorted_exp_res
 
 
 def run_integration_test(
