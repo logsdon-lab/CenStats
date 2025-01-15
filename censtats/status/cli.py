@@ -96,11 +96,10 @@ def check_cens_status(
     restrict_13_21: bool = False,
     restrict_14_22: bool = False,
 ) -> int:
-    df_ctg = read_repeatmasker_output(input_rm).collect()
+    df_ctg = read_repeatmasker_output(input_rm)
     df_ref = (
         read_repeatmasker_output(reference_rm)
         .filter(pl.col("contig").str.starts_with(reference_prefix))
-        .collect()
     )
 
     contigs, refs, dsts, orts = [], [], [], []
