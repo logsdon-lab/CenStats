@@ -84,7 +84,7 @@ def join_summarize_results(
 
 
 def check_cens_status(
-    input_rm: str,
+    input_rm: TextIO,
     output: TextIO,
     reference_rm: str,
     *,
@@ -96,11 +96,10 @@ def check_cens_status(
     restrict_13_21: bool = False,
     restrict_14_22: bool = False,
 ) -> int:
-    df_ctg = read_repeatmasker_output(input_rm).collect()
+    df_ctg = read_repeatmasker_output(input_rm)
     df_ref = (
         read_repeatmasker_output(reference_rm)
         .filter(pl.col("contig").str.starts_with(reference_prefix))
-        .collect()
     )
 
     contigs, refs, dsts, orts = [], [], [], []
@@ -202,7 +201,7 @@ def add_status_cli(parser: SubArgumentParser) -> None:
         "-i",
         "--input",
         help="Input RepeatMasker output. Should contain contig reference. Expects no header.",
-        type=str,
+        type=argparse.FileType("rb"),
         required=True,
     )
     ap.add_argument(

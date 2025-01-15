@@ -3,7 +3,7 @@ import sys
 import argparse
 import polars as pl
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TextIO
 
 from .constants import (
     RGX_CHR,
@@ -30,7 +30,7 @@ def add_hor_length_cli(parser: SubArgumentParser) -> None:
         "-i",
         "--input",
         help=f"Input stv row bed file produced by HumAS-HMMER and stv. Expects columns: {DEF_EXP_STV_ROW_BED_COLS}",
-        type=str,
+        type=argparse.FileType("rb"),
     )
     ap.add_argument(
         "-o",
@@ -55,7 +55,7 @@ def add_hor_length_cli(parser: SubArgumentParser) -> None:
 
 
 def calculate_hor_length(
-    infile: str, bp_jump_thr: int, arr_len_thr: int, output: str
+    infile: TextIO, bp_jump_thr: int, arr_len_thr: int, output: str
 ) -> int:
     """
     Calculate HOR array length from HumAS-HMMER structural variation row output.
