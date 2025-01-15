@@ -84,7 +84,7 @@ def join_summarize_results(
 
 
 def check_cens_status(
-    input_rm: str,
+    input_rm: TextIO,
     output: TextIO,
     reference_rm: str,
     *,
@@ -202,7 +202,7 @@ def add_status_cli(parser: SubArgumentParser) -> None:
         "-i",
         "--input",
         help="Input RepeatMasker output. Should contain contig reference. Expects no header.",
-        type=str,
+        type=argparse.FileType("rb"),
         required=True,
     )
     ap.add_argument(

@@ -186,7 +186,6 @@ def add_nonredundant_cli(parser: SubArgumentParser) -> None:
         "-l",
         "--infile_left",
         type=argparse.FileType("rb"),
-        default=sys.stdin,
         help=" ".join(
             [
                 f"Centromere lengths. Expects columns: {IO_COLS}.",
