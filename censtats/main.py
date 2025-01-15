@@ -46,6 +46,7 @@ def main() -> int:
             args.outfile_both,
             args.duplicates_left,
             args.duplicates_right,
+            bp_diff=args.diff_bp,
         )
     else:
         raise ValueError(f"Unknown command: {args.cmd}")
