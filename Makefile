@@ -1,10 +1,9 @@
-.PHONY: build test venv clean install upload
+.PHONY: build test venv dev clean install upload
 
 BIN=$(shell pwd)/venv/bin/
 PROJECT_NAME=censtats
 
 test:
-	$(BIN)python3 -m pip install pytest
 	$(BIN)python3 -m pytest -vv
 
 build:
@@ -18,6 +17,10 @@ install:
 
 venv:
 	python3 -m venv venv
+
+dev:
+	$(BIN)python3 -m pip install -r requirements.txt
+	$(BIN)python3 -m pip install pytest
 
 clean:
 	rm -rf dist/ *.egg-info .*_cache
