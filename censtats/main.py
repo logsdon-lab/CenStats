@@ -3,6 +3,7 @@ from typing import Any, TYPE_CHECKING
 
 from .status.cli import add_status_cli, check_cens_status
 from .length.cli import add_hor_length_cli, calculate_hor_length
+from .nonredundant.cli import add_nonredundant_cli, get_nonredundant_cens
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
@@ -15,6 +16,7 @@ def main() -> int:
     sub_ap = ap.add_subparsers(dest="cmd")
     add_status_cli(sub_ap)
     add_hor_length_cli(sub_ap)
+    add_nonredundant_cli(sub_ap)
 
     args = ap.parse_args()
 
@@ -34,6 +36,17 @@ def main() -> int:
     elif args.cmd == "length":
         return calculate_hor_length(
             args.input, args.bp_jump_thr, args.arr_len_thr, args.output
+        )
+    elif args.cmd == "nonredundant":
+        return get_nonredundant_cens(
+            args.infile_left,
+            args.infile_right,
+            args.outfile_left,
+            args.outfile_right,
+            args.outfile_both,
+            args.duplicates_left,
+            args.duplicates_right,
+            bp_diff=args.diff_bp,
         )
     else:
         raise ValueError(f"Unknown command: {args.cmd}")
