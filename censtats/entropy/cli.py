@@ -20,13 +20,13 @@ else:
     SubArgumentParser = Any
 
 
-def get_shannon_entropy_itvs(
+def get_shannon_index_itvs(
     df: pl.DataFrame,
     window_size: int = DEF_WINDOW_SIZE,
     filter_repeats: set[str] | None = None,
 ) -> Generator[Interval, None, None]:
     """
-    Calculate windowed shannon entropy from repeat content.
+    Calculate windowed shannon index from repeat content.
 
     # Args
     * df
@@ -95,7 +95,7 @@ def get_shannon_entropy_itvs(
         yield Interval(window_st, window_end, round(sh_idx, 3))
 
 
-def get_single_shannon_entropy(
+def calculate_single_windowed_shannon_index(
     df_group: tuple[tuple[object, ...], pl.DataFrame],
     outdir: str | None,
     window: int,
@@ -104,7 +104,7 @@ def get_single_shannon_entropy(
     omit_plot: bool,
 ) -> pl.DataFrame | None:
     """
-    Calculate shannon entropy for a chrom `DataFrame` group.
+    Calculate windowed shannon index for a chrom `DataFrame` group.
 
     # Args
     * df_group
@@ -123,18 +123,16 @@ def get_single_shannon_entropy(
     """
     grp, df = df_group
     chrom = grp[0]
-    logger.info(f"Calculating Shannon entropy for {chrom}")
-    itvs = list(
-        get_shannon_entropy_itvs(df, window, filter_repeats=set(ignore_repeats))
-    )
+    logger.info(f"Calculating Shannon index for {chrom}")
+    itvs = list(get_shannon_index_itvs(df, window, filter_repeats=set(ignore_repeats)))
     merged_itvs = merge_itvs(
         itvs,
         dst=1,
-        # Merge if entropy equal.
+        # Merge if index equal.
         fn_cmp=lambda x, y: x.data == y.data,
         fn_merge_itv=lambda x, y: Interval(x.begin, y.end, x.data),
     )
-    # Scale colors based on entropy
+    # Scale colors based on index
     cmap = LinearSegmentedColormap.from_list("", ["red", "orange", "green"])
     df_entropy = pl.DataFrame(
         [
@@ -142,7 +140,7 @@ def get_single_shannon_entropy(
                 chrom,
                 i.begin,
                 i.end,
-                "shannon_entropy",
+                "shannon_index",
                 i.data,
                 "+",
                 i.begin,
@@ -181,7 +179,7 @@ def get_single_shannon_entropy(
 
         plt.title(f"{chrom} ({window=:,}bp)")
         plt.xlabel("Position")
-        plt.ylabel("Shannon entropy")
+        plt.ylabel("Shannon index")
         plt.minorticks_on()
         plt.savefig(os.path.join(outdir, f"{chrom}.png"), bbox_inches="tight")
         plt.close()
@@ -192,7 +190,7 @@ def get_single_shannon_entropy(
     return None
 
 
-def calculate_windowed_shannon_entropy(
+def calculate_windowed_shannon_index(
     infile: TextIO,
     outdir: str,
     window_size: int,
@@ -210,16 +208,16 @@ def calculate_windowed_shannon_entropy(
 
     df_grps = df_all.partition_by(["chrom"], as_dict=True, maintain_order=True).items()
     for grp in df_grps:
-        get_single_shannon_entropy(
+        calculate_single_windowed_shannon_index(
             grp, outdir, window_size, ignore_repeats, omit_plot=omit_plot
         )
 
     # with ProcessPoolExecutor(cores) as pool:
     # _ = pool.map(
-    #     get_single_shannon_entropy,
+    #     calculate_single_windowed_shannon_index,
     #     *zip(
     #         *[
-    #             get_single_shannon_entropy(grp, outdir, window_size, ignore_regions)
+    #             (grp, outdir, window_size, ignore_regions)
     #             for grp in df_all.partition_by(["chrom"], as_dict=True, maintain_order=True).items()
     #         ]
     #     )
@@ -230,19 +228,37 @@ def calculate_windowed_shannon_entropy(
 def add_entropy_cli(parser: SubArgumentParser) -> None:
     ap = parser.add_parser(
         "entropy",
-        description="Calculate shannon entropy across a region from RepeatMasker repeats.",
+        description="Calculate shannon index across a region from RepeatMasker repeats.",
     )
     ap.add_argument(
-        "-i", "--input", required=True, help="Repeatmasker bedfile. Expects"
+        "-i",
+        "--input",
+        required=True,
+        help=f"Repeatmasker bedfile. Expects {DEF_BED9_COLS}. The 'name' column should correspond to the repeat name.",
     )
-    ap.add_argument("-w", "--window", type=int, default=5000, help="Window size.")
-    ap.add_argument("-o", "--outdir", type=str, required=True, help="Output dir.")
+    ap.add_argument(
+        "-w",
+        "--window",
+        type=int,
+        default=DEF_WINDOW_SIZE,
+        help=f"Window size. Default: {DEF_WINDOW_SIZE}",
+    )
+    ap.add_argument(
+        "-o",
+        "--outdir",
+        type=str,
+        required=True,
+        help=(
+            "Output dir. Will produce a BED9 file where 'score' corresponds to the Shannon index. "
+            "The plot visualize this index across the given repeat region."
+        ),
+    )
     # ap.add_argument("-c", "--cores", type=int, default=4, help="Number of cores to use.")
     ap.add_argument(
         "--ignore_repeats",
         nargs="*",
         default=[],
-        help="Repeat types to ignore in calculation.",
+        help=f"Repeat types to ignore in calculation. Default: {DEF_FILTER_RP}",
     )
     ap.add_argument("--omit_plot", action="store_true", help="Omit plot.")
 

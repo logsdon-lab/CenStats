@@ -10,6 +10,8 @@ Centromere statistics toolkit.
     * Estimate HOR array length from [`stv`](https://github.com/fedorrik/stv) bed file and [`HumAS-HMMER`](https://github.com/fedorrik/HumAS-HMMER_for_AnVIL) output.
 * `nonredundant`
     * Get a non-redundant list of centromeres based on HOR array length from two AS-HOR array length lists. Uses output from `length` command.
+* `entropy`
+    * Calculate Shannon index across a region from [`RepeatMasker`](https://www.repeatmasker.org/) repeats.
 
 ### Setup
 ```bash
@@ -18,15 +20,15 @@ pip install censtats
 
 ### Usage
 ```bash
-usage: censtats [-h] {status,length,nonredundant} ...
+usage: main.py [-h] {status,length,nonredundant,entropy} ...
 
 Centromere statistics toolkit.
 
 positional arguments:
-  {status,length,nonredundant}
+  {status,length,nonredundant,entropy}
 
 options:
-  -h, --help       show this help message and exit
+  -h, --help            show this help message and exit
 ```
 
 Read the docs [here](https://github.com/logsdon-lab/CenStats/wiki/Usage).
