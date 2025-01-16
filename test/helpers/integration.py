@@ -28,7 +28,9 @@ def check_output(outputs: Outputs_To_Check) -> None:
 
 
 def run_integration_test(
-    *cmd: str, cmd_output: str | None, expected_output: str | Iterable[tuple[str, str]]
+    *cmd: str,
+    expected_output: str | Iterable[tuple[str, str]],
+    cmd_output: str | None = None,
 ) -> None:
     """
     Run integration test and check/cleans up outputs.
