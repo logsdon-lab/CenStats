@@ -22,3 +22,5 @@ test/nonredundant/expected/dupes_right.tsv filter=lfs diff=lfs merge=lfs -text
 test/nonredundant/input/verkko_all_AS-HOR_lengths.tsv filter=lfs diff=lfs merge=lfs -text
 test/nonredundant/expected/dupes_left.tsv filter=lfs diff=lfs merge=lfs -text
 test/nonredundant/expected/unaccounted_right.tsv filter=lfs diff=lfs merge=lfs -text
+test/entropy/input/HG00096_rm.bed filter=lfs diff=lfs merge=lfs -text
+test/entropy/expected/haplotype1-0000001_expected.bed filter=lfs diff=lfs merge=lfs -text
