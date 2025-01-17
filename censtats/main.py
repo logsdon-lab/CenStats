@@ -4,6 +4,7 @@ from typing import Any, TYPE_CHECKING
 from .status.cli import add_status_cli, check_cens_status
 from .length.cli import add_hor_length_cli, calculate_hor_length
 from .nonredundant.cli import add_nonredundant_cli, get_nonredundant_cens
+from .entropy.cli import add_entropy_cli, calculate_windowed_shannon_index
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
@@ -17,6 +18,7 @@ def main() -> int:
     add_status_cli(sub_ap)
     add_hor_length_cli(sub_ap)
     add_nonredundant_cli(sub_ap)
+    add_entropy_cli(sub_ap)
 
     args = ap.parse_args()
 
@@ -47,6 +49,15 @@ def main() -> int:
             args.duplicates_left,
             args.duplicates_right,
             bp_diff=args.diff_bp,
+        )
+    elif args.cmd == "entropy":
+        return calculate_windowed_shannon_index(
+            args.input,
+            args.outdir,
+            args.window,
+            args.ignore_repeats,
+            # args.cores,
+            omit_plot=args.omit_plot,
         )
     else:
         raise ValueError(f"Unknown command: {args.cmd}")
