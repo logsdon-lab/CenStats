@@ -93,16 +93,9 @@ def calculate_hor_length(
         if mtch_chr_name is None:
             continue
 
-        chr_name = mtch_chr_name.group(0)
         df_live_hor = df_chr.filter(pl.col("hor").str.contains("L"))
 
-        # Specific edge case for chr8.
-        if chr_name == "chr8" or chr_name == "chr10" or chr_name == "chr16":
-            bp_jump_thr = 10_000
-        elif chr_name == "chrY":
-            bp_jump_thr = 2_000
-        else:
-            bp_jump_thr = bp_jump_thr
+        bp_jump_thr = bp_jump_thr
 
         df_bp_jumps = df_live_hor.with_columns(
             diff=pl.col("start") - pl.col("stop").shift(1)
@@ -151,13 +144,6 @@ def calculate_hor_length(
                 )
 
         lens = []
-        chr_mer_filter = None
-        if chr_name == "chr10" or chr_name == "chr20":
-            chr_mer_filter = pl.col("mer") >= 5
-        elif chr_name == "chrY":
-            chr_mer_filter = pl.col("mer") >= 30
-        elif chr_name == "chr17":
-            chr_mer_filter = pl.col("mer") >= 4
 
         for start, stop in zip(starts, stops):
             df_slice = (
@@ -165,9 +151,6 @@ def calculate_hor_length(
                 .with_columns(bp_jump=pl.col("start") - pl.col("stop").shift(1))
                 .fill_null(0)
             )
-            # Filter out mers based on chr.
-            if chr_mer_filter is not None:
-                df_slice = df_slice.filter(chr_mer_filter)
 
             if df_slice.is_empty():
                 lens.append(0)
@@ -186,15 +169,6 @@ def calculate_hor_length(
                 "len": lens,
             }
         )
-        if (
-            chr_name == "chr8"
-            or chr_name == "chr10"
-            or chr_name == "chr17"
-            or chr_name == "chrY"
-        ):
-            arr_len_thr = 100_000
-        else:
-            arr_len_thr = arr_len_thr
 
         dfs.append(lf.filter(pl.col("len") > arr_len_thr).collect())
 
