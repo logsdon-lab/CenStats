@@ -24,3 +24,7 @@ test/nonredundant/expected/dupes_left.tsv filter=lfs diff=lfs merge=lfs -text
 test/nonredundant/expected/unaccounted_right.tsv filter=lfs diff=lfs merge=lfs -text
 test/entropy/input/HG00096_rm.bed filter=lfs diff=lfs merge=lfs -text
 test/entropy/expected/haplotype1-0000001_expected.bed filter=lfs diff=lfs merge=lfs -text
+test/self_ident/input/chm13_chr1.fa.fai filter=lfs diff=lfs merge=lfs -text
+test/self_ident/input/chm13_chr1.fa filter=lfs diff=lfs merge=lfs -text
+test/self_ident/expected/1D/chr1:121119252-127324151_expected.bed filter=lfs diff=lfs merge=lfs -text
+test/self_ident/expected/2D/chr1:121119252-127324151_expected.bed filter=lfs diff=lfs merge=lfs -text

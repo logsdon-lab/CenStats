@@ -5,6 +5,8 @@ from .status.cli import add_status_cli, check_cens_status
 from .length.cli import add_hor_length_cli, calculate_hor_length
 from .nonredundant.cli import add_nonredundant_cli, get_nonredundant_cens
 from .entropy.cli import add_entropy_cli, calculate_windowed_shannon_index
+from .self_ident.cli import add_self_ident_cli, get_self_seq_ident
+
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
@@ -19,6 +21,7 @@ def main() -> int:
     add_hor_length_cli(sub_ap)
     add_nonredundant_cli(sub_ap)
     add_entropy_cli(sub_ap)
+    add_self_ident_cli(sub_ap)
 
     args = ap.parse_args()
 
@@ -58,6 +61,21 @@ def main() -> int:
             args.ignore_repeats,
             # args.cores,
             omit_plot=args.omit_plot,
+        )
+    elif args.cmd == "self-ident":
+        return get_self_seq_ident(
+            args.infile,
+            args.outdir,
+            args.window,
+            args.delta,
+            args.kmer_size,
+            args.ident_thr,
+            args.modimizer,
+            args.n_bins,
+            args.ignore_bands,
+            args.processes,
+            args.mode,
+            args.round_ndigits,
         )
     else:
         raise ValueError(f"Unknown command: {args.cmd}")
