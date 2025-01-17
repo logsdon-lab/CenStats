@@ -20,7 +20,7 @@ from ..helpers.integration import run_integration_test
             "test/self_ident/input/chm13_chr1.fa",
             "test/self_ident/expected/2D/chr1:121119252-127324151.bed",
             "test/self_ident/expected/2D/chr1:121119252-127324151_expected.bed",
-            tuple(["--round_ndigits", "3", "--mode", "2D"]),
+            tuple(["--round_ndigits", "3", "--dim", "2D"]),
         ),
     ],
 )

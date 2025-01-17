@@ -4,7 +4,7 @@ import argparse
 
 from loguru import logger
 from typing import TYPE_CHECKING, Any, Generator
-from enum import Enum
+from enum import StrEnum
 from statistics import mean
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
@@ -19,7 +19,7 @@ else:
     SubArgumentParser = Any
 
 
-class Mode(Enum):
+class Dim(StrEnum):
     ONE = "1D"
     TWO = "2D"
 
@@ -72,7 +72,7 @@ def get_single_self_seq_ident(
     modimizer: int,
     n_bins: int,
     ignore_bands: int,
-    mode: Mode,
+    dim: Dim,
     round_ndigits: int | None,
 ) -> None:
     logger.info(f"Generating self sequence identity for {seq_id}.")
@@ -81,7 +81,7 @@ def get_single_self_seq_ident(
     bed = convertMatrixToBed(mtx, window, ident_thr, seq_id, seq_id, True)
     outfile = os.path.join(outdir, f"{seq_id}.bed")
 
-    if mode == Mode.TWO:
+    if dim == Dim.TWO:
         logger.info(
             f"Writing 2D self sequence identity array for {seq_id} to {outfile}"
         )
@@ -125,11 +125,11 @@ def add_self_ident_cli(parser: SubArgumentParser) -> None:
     )
     ap.add_argument(
         "-x",
-        "--mode",
-        choices=[Mode.ONE, Mode.TWO],
-        help="Mode to run. Dimensionality of self-identity returned.",
-        default=Mode.ONE,
-        type=Mode,
+        "--dim",
+        choices=[Dim.ONE, Dim.TWO],
+        help="Dimensionality of self-identity returned.",
+        default=Dim.ONE,
+        type=Dim,
     )
     ap.add_argument(
         "-p", "--processes", default=4, type=int, help="Number of processes."
@@ -187,7 +187,7 @@ def get_self_seq_ident(
     n_bins: int,
     ignore_bands: int,
     processes: int,
-    mode: Mode,
+    dim: Dim,
     round_ndigits: int | None,
 ):
     os.makedirs(outdir, exist_ok=True)
@@ -209,7 +209,7 @@ def get_self_seq_ident(
                         modimizer,
                         n_bins,
                         ignore_bands,
-                        mode,
+                        dim,
                         round_ndigits,
                     )
                     for seq_id in seq.references

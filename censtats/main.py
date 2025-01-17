@@ -74,7 +74,7 @@ def main() -> int:
             args.n_bins,
             args.ignore_bands,
             args.processes,
-            args.mode,
+            args.dim,
             args.round_ndigits,
         )
     else:
