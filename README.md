@@ -1,6 +1,6 @@
 # `CenStats`
 [![CI](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml/badge.svg)](https://github.com/logsdon-lab/centromere-status-checker/actions/workflows/main.yml)
-[![PyPI - Version](https://img.shields.io/pypi/v/CenStats)](https://pypi.org/project/CenStats/0.0.1/)
+[![PyPI - Version](https://img.shields.io/pypi/v/CenStats)](https://pypi.org/project/CenStats/)
 
 Centromere statistics toolkit.
 
