@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from test.helpers.integration import run_integration_test
+from ..helpers.integration import run_integration_test
 
 
 @pytest.mark.parametrize(
@@ -16,7 +16,7 @@ from test.helpers.integration import run_integration_test
     ],
 )
 def test_check_shannon_entropy(
-    input_rm_bed: str, output_bed, expected_bed: str, args: tuple[str, ...]
+    input_rm_bed: str, output_bed: str, expected_bed: str, args: tuple[str, ...]
 ):
     run_integration_test(
         "python",

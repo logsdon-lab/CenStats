@@ -12,6 +12,9 @@ Centromere statistics toolkit.
     * Get a non-redundant list of centromeres based on HOR array length from two AS-HOR array length lists. Uses output from `length` command.
 * `entropy`
     * Calculate Shannon index across a region from [`RepeatMasker`](https://www.repeatmasker.org/) repeats.
+* `self-ident`
+    * Calculate 1D or 2D self-sequence average nucleotide identity via a k-mer-based containment index. Built from [`ModDotPlot`](https://github.com/marbl/ModDotPlot)'s source code.
+
 
 ### Setup
 ```bash
@@ -20,12 +23,12 @@ pip install censtats
 
 ### Usage
 ```bash
-usage: main.py [-h] {status,length,nonredundant,entropy} ...
+usage: censtats [-h] {status,length,nonredundant,entropy,self-ident} ...
 
 Centromere statistics toolkit.
 
 positional arguments:
-  {status,length,nonredundant,entropy}
+  {status,length,nonredundant,entropy,self-ident}
 
 options:
   -h, --help            show this help message and exit
