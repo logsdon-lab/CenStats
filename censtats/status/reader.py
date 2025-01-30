@@ -1,6 +1,6 @@
 import polars as pl
 from typing import TextIO
-from .constants import RM_COLS
+from .constants import RM_COLS, RM_COL_IDX
 
 
 def read_repeatmasker_output(input_path: TextIO | str) -> pl.DataFrame:
@@ -9,6 +9,7 @@ def read_repeatmasker_output(input_path: TextIO | str) -> pl.DataFrame:
             input_path,
             separator="\t",
             has_header=False,
+            columns=RM_COL_IDX,
             new_columns=RM_COLS,
             truncate_ragged_lines=True,
         )

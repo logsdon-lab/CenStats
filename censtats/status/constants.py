@@ -2,22 +2,13 @@ import re
 
 
 RM_COLS = [
-    "idx",
-    "div",
-    "deldiv",
-    "insdiv",
     "contig",
     "start",
     "end",
-    "left",
-    "C",
     "type",
     "rClass",
-    "right",
-    "x",
-    "y",
-    "z",
 ]
+RM_COL_IDX = [4, 5, 6, 9, 10]
 CHROMOSOMES_13_21 = {
     "chr13",
     "chr21",

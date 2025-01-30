@@ -40,7 +40,14 @@ def main() -> int:
         )
     elif args.cmd == "length":
         return calculate_hor_length(
-            args.input, args.bp_jump_thr, args.arr_len_thr, args.output
+            infile=args.input_stv,
+            rmfile=args.input_rm,
+            bp_merge=args.bp_merge,
+            min_grp_hor_units=args.min_grp_hor_units,
+            min_hor_mons=args.min_hor_mons,
+            min_arr_hor_units=args.min_arr_hor_units,
+            output=args.output,
+            output_strand=args.output_strand,
         )
     elif args.cmd == "nonredundant":
         return get_nonredundant_cens(
