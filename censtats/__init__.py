@@ -1,3 +1,3 @@
-import length
+from . import length
 
 __all__ = ["length"]
