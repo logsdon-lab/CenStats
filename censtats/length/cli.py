@@ -7,6 +7,8 @@ from .estimate_length import hor_array_length
 from .constants import (
     DEF_MIN_BLK_HOR_UNITS,
     DEF_MIN_ARR_HOR_UNITS,
+    DEF_MIN_ARR_LEN,
+    DEF_MIN_ARR_PROP,
     DEF_BP_MERGE_UNITS,
     DEF_BP_MERGE_BLKS,
     DEF_INPUT_BED_COLS,
@@ -83,6 +85,20 @@ def add_hor_length_cli(parser: SubArgumentParser) -> None:
         type=int,
         default=DEF_MIN_ARR_HOR_UNITS,
     )
+    ap.add_argument(
+        "-fp",
+        "--min_arr_prop",
+        help="Require that an HOR array has at least this proportion of HOR by length.",
+        type=float,
+        default=DEF_MIN_ARR_PROP,
+    )
+    ap.add_argument(
+        "-fl",
+        "--min_arr_len",
+        help="Require that an HOR array is this size in bp.",
+        type=int,
+        default=DEF_MIN_ARR_LEN,
+    )
     return None
 
 
@@ -92,6 +108,8 @@ def calculate_hor_length(
     bp_merge_blks: int,
     min_blk_hor_units: int,
     min_arr_hor_units: int,
+    min_arr_len: int,
+    min_arr_prop: int,
     output: TextIO,
     output_strand: str | None = None,
     rmfile: TextIO | None = None,
@@ -114,6 +132,10 @@ def calculate_hor_length(
         Grouped stv rows must have at least `n` HOR units unbroken.
     `min_arr_hor_units`
         Require that an HOR array have at least `n` HOR units.
+    `min_arr_len`
+        Require that an HOR array is this size in bp.
+    `min_arr_prop`
+        Require that an HOR array has at least this proportion of HORs by length.
     `output`
         Output bed file with HOR array lengths.
         Columns: `{chrom, chrom_st, chrom_end, length}`.
@@ -134,6 +156,8 @@ def calculate_hor_length(
         bp_merge_blks=bp_merge_blks,
         min_blk_hor_units=min_blk_hor_units,
         min_arr_hor_units=min_arr_hor_units,
+        min_arr_len=min_arr_len,
+        min_arr_prop=min_arr_prop,
         output_strand=isinstance(output_strand, str),
     )
 

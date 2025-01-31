@@ -10,6 +10,8 @@ from .constants import (
     DEF_MERGE_RBLACKLIST,
     DEF_MIN_ARR_HOR_UNITS,
     DEF_MIN_BLK_HOR_UNITS,
+    DEF_MIN_ARR_PROP,
+    DEF_MIN_ARR_LEN,
     DEF_OUTPUT_BED_COLS,
     DEF_OUTPUT_BED_COLS_STRAND,
 )
@@ -46,6 +48,8 @@ def hor_array_length(
     bp_merge_blks: int = DEF_BP_MERGE_BLKS,
     min_blk_hor_units: int = DEF_MIN_BLK_HOR_UNITS,
     min_arr_hor_units: int = DEF_MIN_ARR_HOR_UNITS,
+    min_arr_len: int = DEF_MIN_ARR_LEN,
+    min_arr_prop: float = DEF_MIN_ARR_PROP,
     *,
     output_strand: bool = True,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
@@ -177,7 +181,11 @@ def hor_array_length(
                     ),
                     orient="row",
                     schema=DEF_OUTPUT_BED_COLS_STRAND,
-                ).filter(pl.col("score") >= min_arr_hor_units)
+                ).filter(
+                    (pl.col("score") >= min_arr_hor_units)
+                    & (pl.col("prop") >= min_arr_prop)
+                    & (pl.col("name") >= min_arr_len)
+                )
                 dfs_strand.append(df_strand)
 
         df = (
@@ -197,7 +205,11 @@ def hor_array_length(
                 schema=DEF_OUTPUT_BED_COLS,
             )
             # Require that array has at least n merged HOR units.
-            .filter(pl.col("score") >= min_arr_hor_units)
+            .filter(
+                (pl.col("score") >= min_arr_hor_units)
+                & (pl.col("prop") >= min_arr_prop)
+                & (pl.col("name") >= min_arr_len)
+            )
         )
 
         dfs.append(df)

@@ -46,6 +46,8 @@ def main() -> int:
             bp_merge_blks=args.bp_merge_blks,
             min_blk_hor_units=args.min_blk_hor_units,
             min_arr_hor_units=args.min_arr_hor_units,
+            min_arr_len=args.min_arr_len,
+            min_arr_prop=args.min_arr_prop,
             output=args.output,
             output_strand=args.output_strand,
         )
