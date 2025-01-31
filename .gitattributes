@@ -38,5 +38,6 @@ test/length/expected/AS-HOR-vs-chm13_cens_v18.stv_row.all.strand.bed filter=lfs 
 test/length/expected/HG03520_chr10_haplotype2-0000161:38555523-44048872.bed filter=lfs diff=lfs merge=lfs -text
 test/length/expected/NA19036_chr4_haplotype2-0000075:49294287-52381925.bed filter=lfs diff=lfs merge=lfs -text
 test/length/expected/NA19036_chr4_haplotype2-0000075:49294287-52381925_strand.bed filter=lfs diff=lfs merge=lfs -text
+test/length/expected/NA19036_chr4_haplotype2-0000075:49294287-52381925_incorrect.bed filter=lfs diff=lfs merge=lfs -text
 test/length/expected/NA19331_chr2_haplotype2-0000182:91704425-96165312.bed filter=lfs diff=lfs merge=lfs -text
 test/length/expected/NA19331_chr2_haplotype2-0000182:91704425-96165312_strand.bed filter=lfs diff=lfs merge=lfs -text

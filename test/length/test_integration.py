@@ -27,14 +27,23 @@ from test.helpers.integration import run_integration_test
             None,
             tuple(),
         ),
+        # chr4 merge across other repeats.
+        (
+            "test/length/input/NA19036_chr4_haplotype2-0000075:49294287-52381925.bed",
+            None,
+            "test/length/expected/NA19036_chr4_haplotype2-0000075:49294287-52381925_incorrect.bed",
+            None,
+            # Large bp_merge_blks value
+            tuple(["-mb", "100000"]),
+        ),
         # Use repeatmasker tracks to avoid merging across other repeats.
         (
             "test/length/input/NA19036_chr4_haplotype2-0000075:49294287-52381925.bed",
             "test/length/input/NA19036_chr4_haplotype2-0000075:49294287-52381925.out",
             "test/length/expected/NA19036_chr4_haplotype2-0000075:49294287-52381925.bed",
             "test/length/expected/NA19036_chr4_haplotype2-0000075:49294287-52381925_strand.bed",
-            # Large bp_merge value
-            tuple(["-m", "100000"]),
+            # Large bp_merge_blks value
+            tuple(["-mb", "100000"]),
         ),
         # chr2 LINE elements.
         (

@@ -42,9 +42,9 @@ def main() -> int:
         return calculate_hor_length(
             infile=args.input_stv,
             rmfile=args.input_rm,
-            bp_merge=args.bp_merge,
-            min_grp_hor_units=args.min_grp_hor_units,
-            min_hor_mons=args.min_hor_mons,
+            bp_merge_units=args.bp_merge_units,
+            bp_merge_blks=args.bp_merge_blks,
+            min_blk_hor_units=args.min_blk_hor_units,
             min_arr_hor_units=args.min_arr_hor_units,
             output=args.output,
             output_strand=args.output_strand,
