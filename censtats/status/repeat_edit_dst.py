@@ -3,7 +3,6 @@ import polars as pl
 
 from typing import Iterator, Optional
 
-from .orientation import Orientation
 from .constants import RGX_CHR, REPEAT_SPLIT_LEN
 
 
@@ -55,7 +54,7 @@ def get_contig_similarity_by_edit_dst(
     contigs: list[str],
     ref_contigs: list[str],
     edit_dst: list[int],
-    orientation: list[Orientation],
+    orientation: list[str],
     *,
     dst_perc_thr: float,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:

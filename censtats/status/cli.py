@@ -73,7 +73,9 @@ def join_summarize_results(
             # Never reorient if reference.
             reorient=pl.when(pl.col("contig").str.starts_with(reference_prefix))
             .then(
-                pl.col("reorient").str.replace(Orientation.Reverse, Orientation.Forward)
+                pl.col("reorient").str.replace(
+                    str(Orientation.Reverse), str(Orientation.Forward)
+                )
             )
             .otherwise(pl.col("reorient")),
         )
@@ -161,8 +163,8 @@ def check_cens_status(
             contigs.append(ctg_name)
             refs.append(ref_name)
             refs.append(ref_name)
-            orts.append(Orientation.Forward)
-            orts.append(Orientation.Reverse)
+            orts.append(str(Orientation.Forward))
+            orts.append(str(Orientation.Reverse))
             dsts.append(dst_fwd)
             dsts.append(dst_rev)
 
