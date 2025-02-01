@@ -11,8 +11,8 @@ from matplotlib.colors import LinearSegmentedColormap
 from intervaltree import Interval, IntervalTree
 from loguru import logger
 
-from .common import merge_itvs
 from .constants import DEF_FILTER_RP, DEF_BED9_COLS, DEF_WINDOW_SIZE
+from ..common import merge_itvs
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]

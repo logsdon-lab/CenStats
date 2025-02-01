@@ -1,19 +1,23 @@
-import re
 import sys
 import argparse
-import polars as pl
 
 from typing import TYPE_CHECKING, Any, TextIO
 
+from .estimate_length import hor_array_length
 from .constants import (
-    RGX_CHR,
-    DEF_BP_JUMP_LEN_THR,
-    DEF_ARR_LEN_THR,
-    HOR_BP_LEN,
-    DEF_EXP_STV_ROW_BED_COLS,
+    DEF_MIN_BLK_HOR_UNITS,
+    DEF_MIN_ARR_HOR_UNITS,
+    DEF_MIN_ARR_LEN,
+    DEF_MIN_ARR_PROP,
+    DEF_BP_MERGE_UNITS,
+    DEF_BP_MERGE_BLKS,
+    DEF_INPUT_BED_COLS,
+    DEF_INPUT_RM_COLS,
+    DEF_INPUT_RM_COL_IDX,
     DEF_OUTPUT_BED_COLS,
+    DEF_OUTPUT_BED_COLS_STRAND,
 )
-
+from .io import format_and_output_lengths, read_stv, read_rm
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
@@ -28,9 +32,16 @@ def add_hor_length_cli(parser: SubArgumentParser) -> None:
     )
     ap.add_argument(
         "-i",
-        "--input",
-        help=f"Input stv row bed file produced by HumAS-HMMER and stv. Expects columns: {DEF_EXP_STV_ROW_BED_COLS}",
+        "--input_stv",
+        help=f"Input stv row bed file produced by HumAS-HMMER and stv. Expects columns: {DEF_INPUT_BED_COLS}",
         type=argparse.FileType("rb"),
+    )
+    ap.add_argument(
+        "-r",
+        "--input_rm",
+        help=f"Input tab-delimited RepeatMasker file with no header. Prevents joining across. Expects columns: {DEF_INPUT_RM_COLS} at indices {DEF_INPUT_RM_COL_IDX}.",
+        type=argparse.FileType("rb"),
+        default=None,
     )
     ap.add_argument(
         "-o",
@@ -40,22 +51,68 @@ def add_hor_length_cli(parser: SubArgumentParser) -> None:
         type=argparse.FileType("wt"),
     )
     ap.add_argument(
-        "--bp_jump_thr",
-        help="Base pair jump threshold to group by",
-        type=int,
-        default=DEF_BP_JUMP_LEN_THR,
+        "-s",
+        "--output_strand",
+        help=f"Output bed file with columns: {DEF_OUTPUT_BED_COLS}",
+        default=None,
+        type=str,
     )
     ap.add_argument(
-        "--arr_len_thr",
-        help="Length threshold to filter out.",
+        "-mu",
+        "--bp_merge_units",
+        help="Merge HOR units into HOR blocks within this number of base pairs.",
         type=int,
-        default=DEF_ARR_LEN_THR,
+        default=DEF_BP_MERGE_UNITS,
+    )
+    ap.add_argument(
+        "-mb",
+        "--bp_merge_blks",
+        help="Merge HOR blocks into HOR arrays within this number of bases pairs.",
+        type=int,
+        default=DEF_BP_MERGE_BLKS,
+    )
+    ap.add_argument(
+        "-ub",
+        "--min_blk_hor_units",
+        help="HOR blocks must have at least n HOR units unbroken.",
+        type=int,
+        default=DEF_MIN_BLK_HOR_UNITS,
+    )
+    ap.add_argument(
+        "-ua",
+        "--min_arr_hor_units",
+        help="Require that an HOR array have at least n HOR units.",
+        type=int,
+        default=DEF_MIN_ARR_HOR_UNITS,
+    )
+    ap.add_argument(
+        "-fp",
+        "--min_arr_prop",
+        help="Require that an HOR array has at least this proportion of HOR by length.",
+        type=float,
+        default=DEF_MIN_ARR_PROP,
+    )
+    ap.add_argument(
+        "-fl",
+        "--min_arr_len",
+        help="Require that an HOR array is this size in bp.",
+        type=int,
+        default=DEF_MIN_ARR_LEN,
     )
     return None
 
 
 def calculate_hor_length(
-    infile: TextIO, bp_jump_thr: int, arr_len_thr: int, output: str
+    infile: TextIO,
+    bp_merge_units: int,
+    bp_merge_blks: int,
+    min_blk_hor_units: int,
+    min_arr_hor_units: int,
+    min_arr_len: int,
+    min_arr_prop: int,
+    output: TextIO,
+    output_strand: str | None = None,
+    rmfile: TextIO | None = None,
 ) -> int:
     """
     Calculate HOR array length from HumAS-HMMER structural variation row output.
@@ -63,125 +120,51 @@ def calculate_hor_length(
     ### Parameters
     `infile`
         Input bed file made from HumAS-HMMER output.
-        Expects the following columns: `{chr, start, stop, hor, 0, strand, ...}`.
-    `bp_jump_thr`
-        Base pair jump threshold to group by.
-    `arr_len_thr`
-        Length threshold of HOR array to filter out.
+        Expects the following columns: `{chrom, chrom_st, chrom_end, hor, 0, strand, ...}`.
+    `rmfile`
+        Input RepeatMasker file.
+        Used to prevent merging across other repeat types.
+    `bp_merge_units`
+        Merge HOR units into HOR blocks within this number of base pairs.
+    `bp_merge_blks`
+        Merge HOR blocks into HOR arrays within this number of bases pairs.
+    `min_blk_hor_units`
+        Grouped stv rows must have at least `n` HOR units unbroken.
+    `min_arr_hor_units`
+        Require that an HOR array have at least `n` HOR units.
+    `min_arr_len`
+        Require that an HOR array is this size in bp.
+    `min_arr_prop`
+        Require that an HOR array has at least this proportion of HORs by length.
     `output`
         Output bed file with HOR array lengths.
-        Columns: `{chr_name, start_pos, stop_pos, len}`.
+        Columns: `{chrom, chrom_st, chrom_end, length}`.
+    `output_strand`
+        Output bed file with HOR array lengths by strand.
+        Columns: `{chrom, chrom_st, chrom_end, length, strand}`.
 
     ### Returns
     0 if successful.
     """
-    df = pl.read_csv(
-        infile,
-        separator="\t",
-        columns=[0, 1, 2, 3, 4, 5],
-        new_columns=DEF_EXP_STV_ROW_BED_COLS,
-        has_header=False,
+    df_stv = read_stv(infile)
+    df_rm = read_rm(rmfile) if rmfile else None
+
+    df_all_len, df_all_strand_len = hor_array_length(
+        df_stv=df_stv,
+        df_rm=df_rm,
+        bp_merge_units=bp_merge_units,
+        bp_merge_blks=bp_merge_blks,
+        min_blk_hor_units=min_blk_hor_units,
+        min_arr_hor_units=min_arr_hor_units,
+        min_arr_len=min_arr_len,
+        min_arr_prop=min_arr_prop,
+        output_strand=isinstance(output_strand, str),
     )
 
-    dfs = []
-    for ctg_name, df_chr in df.group_by(["chr"], maintain_order=True):
-        df_chr = df_chr.with_columns(len=pl.col("stop") - pl.col("start")).with_columns(
-            mer=(pl.col("len") / HOR_BP_LEN).round()
-        )
-        ctg_name = ctg_name[0]
-        mtch_chr_name = re.search(RGX_CHR, ctg_name)
-        if mtch_chr_name is None:
-            continue
-
-        df_live_hor = df_chr.filter(pl.col("hor").str.contains("L"))
-
-        bp_jump_thr = bp_jump_thr
-
-        df_bp_jumps = df_live_hor.with_columns(
-            diff=pl.col("start") - pl.col("stop").shift(1)
-        ).filter(pl.col("diff") > bp_jump_thr)
-
-        if df_bp_jumps.is_empty():
-            adj_start = df_live_hor.get_column("start").min()
-            adj_stop = df_live_hor.get_column("stop").max()
-            adj_len = adj_stop - adj_start
-
-            if adj_len < arr_len_thr:
-                continue
-
-            dfs.append(
-                pl.DataFrame(
-                    {
-                        "chr_name": ctg_name,
-                        "start_pos": adj_start,
-                        "stop_pos": adj_stop,
-                        "len": adj_len,
-                    }
-                )
-            )
-            continue
-
-        starts, stops = [], []
-        for i, row in enumerate(df_bp_jumps.iter_rows()):
-            prev_row = pl.DataFrame() if i == 0 else df_bp_jumps.slice(i - 1)
-            next_row = df_bp_jumps.slice(i + 1)
-
-            if prev_row.is_empty():
-                starts.append(df_chr.get_column("start").min())
-                stops.append(
-                    df_chr.filter(pl.col("start") < row[1]).row(-1, named=True)["stop"]
-                )
-
-            if next_row.is_empty():
-                starts.append(row[1])
-                stops.append(df_chr.get_column("stop").max())
-            else:
-                starts.append(row[1])
-                stops.append(
-                    df_chr.filter(
-                        pl.col("start") < next_row.get_column("start")[0]
-                    ).row(-1, named=True)["stop"]
-                )
-
-        lens = []
-
-        for start, stop in zip(starts, stops):
-            df_slice = (
-                df_chr.filter(pl.col("start") >= start, pl.col("stop") <= stop)
-                .with_columns(bp_jump=pl.col("start") - pl.col("stop").shift(1))
-                .fill_null(0)
-            )
-
-            if df_slice.is_empty():
-                lens.append(0)
-                continue
-            df_slice_dst = (
-                # df_slice.with_columns(len=pl.col("stop") - pl.col("start")).get_column("len").sum()
-                df_slice.get_column("stop").max() - df_slice.get_column("start").min()
-            )
-            lens.append(df_slice_dst)
-
-        lf = pl.LazyFrame(
-            {
-                "chr_name": ctg_name,
-                "start_pos": starts,
-                "stop_pos": stops,
-                "len": lens,
-            }
+    if output_strand:
+        format_and_output_lengths(
+            df_all_strand_len, output_strand, DEF_OUTPUT_BED_COLS_STRAND
         )
 
-        dfs.append(lf.filter(pl.col("len") > arr_len_thr).collect())
-
-    df_all_dsts: pl.DataFrame = pl.concat(dfs)
-    (
-        df_all_dsts.with_columns(
-            sort_idx=pl.col("chr_name")
-            .str.extract("chr([0-9XY]+)")
-            .replace({"X": "23", "Y": "24"})
-            .cast(pl.Int32)
-        )
-        .sort(by="sort_idx")
-        .select(DEF_OUTPUT_BED_COLS)
-        .write_csv(output, include_header=False, separator="\t")
-    )
+    format_and_output_lengths(df_all_len, output, DEF_OUTPUT_BED_COLS)
     return 0
