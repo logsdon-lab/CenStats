@@ -152,8 +152,15 @@ def hor_array_length(
             fn_merge_itv=merge_hor_unit_itvs,
         )
         if output_strand:
-            df_live_hor = df_live_hor.with_columns(
-                strand_group=pl.col("strand").rle_id()
+            # Group HOR units by strand into blocks
+            # Requiring at least the min_blk_hor_units per strand block.
+            df_live_hor = (
+                df_live_hor.with_columns(strand_group=pl.col("strand").rle_id())
+                .filter(
+                    pl.col("strand_group").count().over("strand_group")
+                    >= min_blk_hor_units
+                )
+                .with_columns(strand_group=pl.col("strand").rle_id())
             )
             for _, df_strand_group in df_live_hor.group_by(["strand_group"]):
                 strand = df_strand_group.get_column("strand")[0]
