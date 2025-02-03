@@ -53,6 +53,14 @@ from test.helpers.integration import run_integration_test
             "test/length/expected/NA19331_chr2_haplotype2-0000182:91704425-96165312_strand.bed",
             tuple(),
         ),
+        # chr21 single monomer unit ignored in opposite strand
+        (
+            "test/length/input/HG03009_chr21_haplotype1-0000010:4170236-6613435.bed",
+            None,
+            "test/length/expected/HG03009_chr21_haplotype1-0000010:4170236-6613435.bed",
+            "test/length/expected/HG03009_chr21_haplotype1-0000010:4170236-6613435_strand.bed",
+            tuple(),
+        ),
     ],
 )
 def test_check_arr_len(
