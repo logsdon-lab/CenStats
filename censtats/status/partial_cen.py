@@ -67,6 +67,8 @@ def is_partial_centromere(
     # If they don't, check that the contig has at least one ALR that meets the minimum threshold len.
     if not are_edges_alr:
         max_alr_len = df.filter(pl.col("type") == "ALR/Alpha").get_column("dst").max()
+        if not max_alr_len:
+            return True
         return max_alr_len < max_alr_len_thr
 
     return are_edges_alr

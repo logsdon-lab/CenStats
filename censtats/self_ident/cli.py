@@ -1,5 +1,5 @@
 import os
-import pysam
+import pyfaidx
 import argparse
 
 from loguru import logger
@@ -192,15 +192,15 @@ def get_self_seq_ident(
 ):
     os.makedirs(outdir, exist_ok=True)
 
-    seq = pysam.FastaFile(infile)
+    seq = pyfaidx.Fasta(infile)
     with ProcessPoolExecutor(max_workers=processes) as pool:
         _ = pool.map(
             get_single_self_seq_ident,
             *zip(
                 *[
                     (
-                        seq_id,
-                        seq.fetch(seq_id),
+                        sec_rec.name,
+                        str(sec_rec),
                         outdir,
                         window,
                         delta,
@@ -212,7 +212,7 @@ def get_self_seq_ident(
                         dim,
                         round_ndigits,
                     )
-                    for seq_id in seq.references
+                    for sec_rec in seq
                 ]
             ),
         )
