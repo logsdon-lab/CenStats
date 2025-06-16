@@ -4,5 +4,5 @@ editdistance==0.8.1
 intervaltree==3.1.0
 matplotlib==3.10.0
 mmh3==5.0.1
-pysam==0.22.0 --no-binary :all:
+pyfaidx==0.8.1.4
 numpy==2.2.1

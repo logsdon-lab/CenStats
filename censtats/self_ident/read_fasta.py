@@ -1,7 +1,7 @@
 # ModDotPlot
 # https://github.com/marbl/ModDotPlot/commit/0f593a7b7b317cdfc00ef350491e17239eda594f
 from typing import Generator
-import pysam
+import pyfaidx
 import mmh3
 
 tab_b = bytes.maketrans(b"ACTG", b"TGAC")
@@ -26,10 +26,10 @@ def readKmersFromFile(
     """
     Given a filename and an integer k, returns a list of all k-mers found in the sequences in the file.
     """
-    seq = pysam.FastaFile(filename)
+    seq = pyfaidx.Fasta(filename)
 
-    for seq_id in seq.references:
+    for seq_rec in seq:
         kmers_for_seq = [
-            kmer_hash for kmer_hash in generateKmersFromFasta(seq.fetch(seq_id), ksize)
+            kmer_hash for kmer_hash in generateKmersFromFasta(str(seq_rec), ksize)
         ]
-        yield seq_id, kmers_for_seq
+        yield seq_rec.name, kmers_for_seq
