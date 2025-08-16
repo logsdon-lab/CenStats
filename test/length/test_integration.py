@@ -61,6 +61,15 @@ from test.helpers.integration import run_integration_test
             "test/length/expected/HG03009_chr21_haplotype1-0000010:4170236-6613435_strand.bed",
             tuple(),
         ),
+        # Primates srf-n-trf. TRF monomers.
+        (
+            "test/length/input/primates.bed",
+            None,
+            "test/length/expected/primates.bed",
+            "test/length/expected/primates_strand.bed",
+            # Min HOR in unit and array of 0.
+            tuple(["-ua", "0", "-ub", "0", "-mb", "100000", "--allow_nonlive"]),
+        ),
     ],
 )
 def test_check_arr_len(

@@ -44,3 +44,6 @@ test/length/expected/NA19331_chr2_haplotype2-0000182:91704425-96165312.bed filte
 test/length/expected/NA19331_chr2_haplotype2-0000182:91704425-96165312_strand.bed filter=lfs diff=lfs merge=lfs -text
 test/length/expected/HG03009_chr21_haplotype1-0000010:4170236-6613435.bed filter=lfs diff=lfs merge=lfs -text
 test/length/expected/HG03009_chr21_haplotype1-0000010:4170236-6613435_strand.bed filter=lfs diff=lfs merge=lfs -text
+test/length/expected/primates.bed filter=lfs diff=lfs merge=lfs -text
+test/length/expected/primates_strand.bed filter=lfs diff=lfs merge=lfs -text
+test/length/input/primates.bed filter=lfs diff=lfs merge=lfs -text
