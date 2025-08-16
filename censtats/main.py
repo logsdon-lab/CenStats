@@ -50,6 +50,7 @@ def main() -> int:
             min_arr_prop=args.min_arr_prop,
             output=args.output,
             output_strand=args.output_strand,
+            allow_nonlive=args.allow_nonlive,
         )
     elif args.cmd == "nonredundant":
         return get_nonredundant_cens(

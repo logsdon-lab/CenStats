@@ -54,6 +54,8 @@ def format_and_output_lengths(
     output: TextIO | str,
     output_cols: list[str],
 ) -> None:
+    if df.is_empty():
+        raise ValueError("No live HOR data.")
     (
         df.with_columns(
             sort_idx=pl.col("chrom")

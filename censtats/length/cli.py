@@ -99,6 +99,11 @@ def add_hor_length_cli(parser: SubArgumentParser) -> None:
         type=int,
         default=DEF_MIN_ARR_LEN,
     )
+    ap.add_argument(
+        "--allow_nonlive",
+        action="store_true",
+        help="Don't filter for L in name column.",
+    )
     return None
 
 
@@ -113,6 +118,7 @@ def calculate_hor_length(
     output: TextIO,
     output_strand: str | None = None,
     rmfile: TextIO | None = None,
+    allow_nonlive: bool = False,
 ) -> int:
     """
     Calculate HOR array length from HumAS-HMMER structural variation row output.
@@ -142,6 +148,8 @@ def calculate_hor_length(
     `output_strand`
         Output bed file with HOR array lengths by strand.
         Columns: `{chrom, chrom_st, chrom_end, length, strand}`.
+    `allow_nonlive`
+        Don't filter for `L` character.
 
     ### Returns
     0 if successful.
@@ -159,6 +167,7 @@ def calculate_hor_length(
         min_arr_len=min_arr_len,
         min_arr_prop=min_arr_prop,
         output_strand=isinstance(output_strand, str),
+        allow_nonlive=allow_nonlive,
     )
 
     if output_strand:

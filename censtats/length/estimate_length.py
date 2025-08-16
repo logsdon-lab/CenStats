@@ -94,6 +94,7 @@ def hor_array_length(
     min_arr_prop: float = DEF_MIN_ARR_PROP,
     *,
     output_strand: bool = True,
+    allow_nonlive: bool = False,
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
     dfs: list[pl.DataFrame] = []
     dfs_strand: list[pl.DataFrame] = []
@@ -101,8 +102,11 @@ def hor_array_length(
         ["chrom"], maintain_order=True
     ):
         ctg_name = ctg_name[0]
+        if not allow_nonlive:
+            df_chr = df_chr.filter(pl.col("name").str.contains("L"))
+
         df_live_hor = group_by_dst(
-            df_chr.filter(pl.col("name").str.contains("L")),
+            df_chr,
             bp_merge_units,
             "live_group",
         ).filter(
