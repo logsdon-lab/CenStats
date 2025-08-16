@@ -68,7 +68,7 @@ from test.helpers.integration import run_integration_test
             "test/length/expected/primates.bed",
             "test/length/expected/primates_strand.bed",
             # Min HOR in unit and array of 0.
-            tuple(["-ua", "0", "-ub", "0", "-mb", "100000"]),
+            tuple(["-ua", "0", "-ub", "0", "-mb", "100000", "--allow_nonlive"]),
         ),
     ],
 )
