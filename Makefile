@@ -4,6 +4,7 @@ BIN=$(shell pwd)/venv/bin/
 PROJECT_NAME=censtats
 
 test:
+	$(BIN)python3 -m pip install pytest
 	$(BIN)python3 -m pytest -vv
 
 build:
