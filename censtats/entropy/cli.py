@@ -172,9 +172,11 @@ def calculate_single_windowed_shannon_index(
             )
 
         # Plot original values.
-        begin, entropy = zip(*[(itv.begin, itv.data) for itv in itvs])
-        ax.plot(begin, entropy, color="black")
-        ax.fill_between(begin, entropy, color="black")
+        if itvs:
+            begin, entropy = zip(*[(itv.begin, itv.data) for itv in itvs])
+            ax.plot(begin, entropy, color="black")
+            ax.fill_between(begin, entropy, color="black")
+
         ax.margins(x=0, y=0)
 
         plt.title(f"{chrom} ({window=:,}bp)")
