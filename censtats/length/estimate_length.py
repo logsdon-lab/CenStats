@@ -208,6 +208,8 @@ def hor_array_length(
                     & (pl.col("prop") >= min_arr_prop)
                     & (pl.col("name") >= min_arr_len)
                 )
+                if df_strand.is_empty():
+                    continue
                 dfs_strand.append(df_strand)
 
         df = (
@@ -233,13 +235,18 @@ def hor_array_length(
                 & (pl.col("name") >= min_arr_len)
             )
         )
-
+        if df.is_empty():
+            continue
         dfs.append(df)
 
-    df_all = pl.concat(dfs).sort(by=["chrom", "chrom_st"])
+    df_all = (
+        pl.concat(dfs).sort(by=["chrom", "chrom_st"])
+        if dfs
+        else pl.DataFrame(schema=DEF_OUTPUT_BED_COLS)
+    )
     df_all_strand = (
-        pl.concat(dfs_strand)
-        if output_strand
+        pl.concat(dfs_strand).sort(by=["chrom", "chrom_st"])
+        if output_strand and dfs_strand
         else pl.DataFrame(schema=DEF_OUTPUT_BED_COLS_STRAND)
-    ).sort(by=["chrom", "chrom_st"])
+    )
     return df_all, df_all_strand

@@ -1,5 +1,6 @@
 import sys
 import argparse
+import polars as pl
 
 from typing import TYPE_CHECKING, Any, TextIO
 
@@ -154,7 +155,11 @@ def calculate_hor_length(
     ### Returns
     0 if successful.
     """
-    df_stv = read_stv(infile)
+    try:
+        df_stv = read_stv(infile)
+    except pl.exceptions.NoDataError:
+        return 0
+
     df_rm = read_rm(rmfile) if rmfile else None
 
     df_all_len, df_all_strand_len = hor_array_length(
