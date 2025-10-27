@@ -56,11 +56,19 @@ def process_kmer_shannon_index_all_itvs(
     Calculate windowed shannon index from repeat content.
 
     # Args
-    * df
-            * Dataframe with columns: `["chromStart", "chromEnd", and "name"]`
+    * infile
+            * Input fasta file.
+    * chrom
+            * Chromosome name.
+    * chrom_len
+            * Chromosome length.
+    * cores
+            * Number of cores.
     * window_size
             * Window size in bases to calculate shannon index over.
             * By default, 5000 bp.
+    * kmer_size
+            * Kmer size.
 
     # Returns
     Generator of `Interval`s with shannon index in `data` attribute.
@@ -108,11 +116,19 @@ def calculate_plot_windowed_kmer_shannon_index(
 
     # Args
     * infile
-            * DataFrame group from `DataFrame.partition()` or `DataFrame.group_by()`
+            * Input fasta file.
+    * chrom
+            * Chromosome name.
+    * chrom_len
+            * Chromosome length.
+    * kmer_size
+            * Kmer size.
+    * window_size
+            * Window size
+    * cores
+            * Number of cores.
     * outdir
             * Output directory. If `None`, return `DataFrame`
-    * window
-            * Window size
     * omit_plot
             * Do not generate plots.
 
