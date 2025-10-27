@@ -176,6 +176,7 @@ def hor_array_length(
                 .with_columns(
                     strand_group=pl.col("strand").rle_id() + pl.col("live_group")
                 )
+                .drop("index")
             )
             for _, df_strand_group in df_live_hor.group_by(["strand_group"]):
                 strand = df_strand_group.get_column("strand")[0]
