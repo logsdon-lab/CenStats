@@ -10,7 +10,7 @@ from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor
 
 from .estimate_identity import convertMatrixToBed, createSelfMatrix
-from .read_fasta import generateKmersFromFasta
+from ..common import generateKmersFromFasta
 
 
 if TYPE_CHECKING:
