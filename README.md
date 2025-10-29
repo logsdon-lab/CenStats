@@ -12,7 +12,8 @@ Centromere statistics toolkit.
     * Calculate Shannon index across a region from [`RepeatMasker`](https://www.repeatmasker.org/) repeats.
 * `self-ident`
     * Calculate 1D or 2D self-sequence average nucleotide identity via a k-mer-based containment index. Built from [`ModDotPlot`](https://github.com/marbl/ModDotPlot)'s source code.
-
+* `kmer-entropy`
+    * Calculate Shannon index from a fasta file across all windows and their kmer set. 
 
 ### Setup
 ```bash
@@ -21,12 +22,12 @@ pip install censtats
 
 ### Usage
 ```bash
-usage: censtats [-h] {length,nonredundant,entropy,self-ident} ...
+usage: censtats [-h] {length,nonredundant,entropy,self-ident,kmer-entropy} ...
 
 Centromere statistics toolkit.
 
 positional arguments:
-  {length,nonredundant,entropy,self-ident}
+  {length,nonredundant,entropy,self-ident,kmer-entropy}
 
 options:
   -h, --help            show this help message and exit

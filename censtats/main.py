@@ -5,7 +5,10 @@ from .length.cli import add_hor_length_cli, calculate_hor_length
 from .nonredundant.cli import add_nonredundant_cli, get_nonredundant_cens
 from .entropy.cli import add_entropy_cli, calculate_windowed_shannon_index
 from .self_ident.cli import add_self_ident_cli, get_self_seq_ident
-
+from .kmer_entropy.cli import (
+    add_kmer_entropy_cli,
+    calculate_kmer_windowed_shannon_index,
+)
 
 if TYPE_CHECKING:
     SubArgumentParser = argparse._SubParsersAction[argparse.ArgumentParser]
@@ -20,6 +23,7 @@ def main() -> int:
     add_nonredundant_cli(sub_ap)
     add_entropy_cli(sub_ap)
     add_self_ident_cli(sub_ap)
+    add_kmer_entropy_cli(sub_ap)
 
     args = ap.parse_args()
 
@@ -55,6 +59,15 @@ def main() -> int:
             args.window,
             args.ignore_repeats,
             # args.cores,
+            omit_plot=args.omit_plot,
+        )
+    elif args.cmd == "kmer-entropy":
+        return calculate_kmer_windowed_shannon_index(
+            args.input,
+            args.outdir,
+            args.window,
+            args.kmer_size,
+            args.cores,
             omit_plot=args.omit_plot,
         )
     elif args.cmd == "self-ident":
